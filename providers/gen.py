@@ -1,6 +1,32 @@
 from config import settings
 
+def _enhance_prompt(messages: list[dict]) -> list[dict]:
+    detail_instruction = "\n\nCRITICAL INSTRUCTION: Provide the most exhaustive, comprehensive, and detailed answer possible. Do not summarize or skip any nuances. Elaborate fully on every point."
+    
+    new_messages = []
+    has_system = False
+    for msg in messages:
+        if msg["role"] == "system":
+            new_messages.append({
+                "role": "system",
+                "content": msg["content"] + detail_instruction
+            })
+            has_system = True
+        else:
+            new_messages.append(msg)
+            
+    if not has_system:
+        new_messages.insert(0, {
+            "role": "system",
+            "content": "You are a highly detailed assistant." + detail_instruction
+        })
+        
+    return new_messages
+
+
 def generate(messages : list[dict]) -> str:
+    messages = _enhance_prompt(messages)
+
     if settings.gen_provider == "ollama":
         return _gen_ollama(messages)
     elif settings.gen_provider == "openai":
@@ -30,7 +56,8 @@ def _gen_openai(messages : list[dict]) -> str:
 
     response = client.chat.completions.create(
         model= settings.gen_model_openai,
-        messages= messages
+        messages= messages,
+        max_tokens=6144
     )
 
     return response.choices[0].message.content
@@ -61,7 +88,8 @@ def _gen_gemini(messages: list[dict]) -> str:
     config = None
     if system_instruction:
         config = genai.types.GenerateContentConfig(
-            system_instruction=system_instruction
+            system_instruction=system_instruction,
+            max_output_tokens= 6144
         )
     
     response = client.models.generate_content(
@@ -78,7 +106,8 @@ def _gen_groq(messages : list[dict]) -> str:
 
     response = client.chat.completions.create(
         model= settings.gen_model_groq,
-        messages= messages
+        messages= messages,
+        max_tokens=6144
     )
 
     return response.choices[0].message.content
@@ -90,8 +119,7 @@ def _gen_huggingface(messages: list[dict]) -> str:
     
     response = client.chat_completion(
         messages=messages,
-        max_tokens=4096,
-        temperature=0.7
+        max_tokens=6144
     )
     
     return response.choices[0].message.content
@@ -106,7 +134,8 @@ def _gen_zai(messages: list[dict]) -> str:
 
     response = client.chat.completions.create(
         model=settings.gen_model_zai,
-        messages=messages
+        messages=messages,
+        max_tokens=6144
     )
 
     return response.choices[0].message.content
