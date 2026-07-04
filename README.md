@@ -1,4 +1,4 @@
-# Academic Archices
+Mo# Academic Archices
 
 A local RAG (Retrieval-Augmented Generation) system for course materials.
 Upload lecture slides, past year papers, notes, and textbooks — then chat with them.
@@ -20,7 +20,7 @@ Upload lecture slides, past year papers, notes, and textbooks — then chat with
 ### Install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME
+git clone https://github.com/MokshKundra/Academic_Archives
 cd YOUR_REPO_NAME
 
 python -m venv venv
