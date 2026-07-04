@@ -21,7 +21,7 @@ Upload lecture slides, past year papers, notes, and textbooks — then chat with
 
 ```bash
 git clone https://github.com/MokshKundra/Academic_Archives
-cd YOUR_REPO_NAME
+cd Academic_Archives
 
 python -m venv venv
 venv\Scripts\activate      # Windows
