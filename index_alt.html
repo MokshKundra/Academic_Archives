@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Archives</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0ecf3;
+            color: #2f2438;
+        }
+
+        .font-serif {
+            font-family: 'Lora', serif;
+        }
+
+        /* Animations */
+        .fade-in-up {
+            animation: fadeInUp 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pop-in {
+            animation: popIn 0.3s ease-out forwards;
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #b5a3c5;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #5a4968;
+        }
+
+        /* Typing Indicator */
+        .typing-dot {
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+                opacity: 0.3;
+            }
+
+            30% {
+                transform: translateY(-4px);
+                opacity: 1;
+            }
+        }
+
+        /* Markdown rendered content styles */
+        .markdown-body {
+            font-size: 15px;
+            line-height: 1.75;
+            color: #2f2438;
+        }
+
+        .markdown-body p {
+            margin-bottom: 0.75em;
+        }
+
+        .markdown-body p:last-child {
+            margin-bottom: 0;
+        }
+
+        .markdown-body strong {
+            color: #241b2b;
+            font-weight: 600;
+        }
+
+        .markdown-body em {
+            color: #5a4968;
+            font-style: italic;
+        }
+
+        .markdown-body h1,
+        .markdown-body h2,
+        .markdown-body h3,
+        .markdown-body h4 {
+            font-family: 'Lora', serif;
+            color: #241b2b;
+            font-weight: 600;
+            margin-top: 1.25em;
+            margin-bottom: 0.5em;
+        }
+
+        .markdown-body h1 {
+            font-size: 1.35em;
+        }
+
+        .markdown-body h2 {
+            font-size: 1.2em;
+        }
+
+        .markdown-body h3 {
+            font-size: 1.05em;
+        }
+
+        .markdown-body h1:first-child,
+        .markdown-body h2:first-child,
+        .markdown-body h3:first-child {
+            margin-top: 0;
+        }
+
+        .markdown-body ul,
+        .markdown-body ol {
+            margin: 0.6em 0;
+            padding-left: 1.5em;
+        }
+
+        .markdown-body ul {
+            list-style-type: disc;
+        }
+
+        .markdown-body ol {
+            list-style-type: decimal;
+        }
+
+        .markdown-body li {
+            margin-bottom: 0.35em;
+            padding-left: 0.2em;
+        }
+
+        .markdown-body li p {
+            margin-bottom: 0.25em;
+        }
+
+        .markdown-body code {
+            background: #e1d9e8;
+            border: 1px solid #c3b5d1;
+            padding: 0.15em 0.4em;
+            border-radius: 4px;
+            font-size: 0.875em;
+            color: #3d3048;
+            font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+        }
+
+        .markdown-body pre {
+            background: #e1d9e8;
+            border: 1px solid #c3b5d1;
+            border-radius: 8px;
+            padding: 1em;
+            overflow-x: auto;
+            margin: 0.75em 0;
+        }
+
+        .markdown-body pre code {
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 0.85em;
+            line-height: 1.6;
+        }
+
+        .markdown-body blockquote {
+            border-left: 3px solid #b5a3c5;
+            padding-left: 1em;
+            margin: 0.75em 0;
+            color: #4b3d59;
+        }
+
+        .markdown-body a {
+            color: #4b3d59;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .markdown-body a:hover {
+            color: #2f2438;
+        }
+
+        .markdown-body hr {
+            border: none;
+            border-top: 1px solid #c3b5d1;
+            margin: 1.25em 0;
+        }
+
+        .markdown-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.75em 0;
+            font-size: 0.9em;
+        }
+
+        .markdown-body th,
+        .markdown-body td {
+            border: 1px solid #c3b5d1;
+            padding: 0.5em 0.75em;
+            text-align: left;
+        }
+
+        .markdown-body th {
+            background: #e1d9e8;
+            font-weight: 600;
+            color: #241b2b;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="bg-[#e1d9e8]/80 backdrop-blur-md border-b border-[#c3b5d1] sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2 cursor-pointer group" onclick="showView('landing')">
+                <div
+                    class="w-7 h-7 bg-[#4b3d59] rounded-md flex items-center justify-center text-[#e1d9e8] font-bold text-sm group-hover:bg-[#3d3048] transition-colors">
+                    A</div>
+                <span class="font-serif text-xl font-medium text-[#2f2438] tracking-tight">Academic Archives</span>
+            </div>
+            <div class="space-x-1 hidden sm:flex">
+                <button onclick="showView('upload')"
+                    class="px-4 py-2 text-sm font-medium text-[#4b3d59] hover:text-[#2f2438] hover:bg-[#c3b5d1] rounded-lg transition-all">Add
+                    Data</button>
+                <button onclick="showView('query')"
+                    class="px-4 py-2 text-sm font-medium text-[#4b3d59] hover:text-[#2f2438] hover:bg-[#c3b5d1] rounded-lg transition-all">Ask
+                    Questions</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-6xl w-full mx-auto px-6 py-10">
+
+        <!-- LANDING VIEW -->
+        <div id="landing-view" class="fade-in-up flex flex-col items-center text-center py-16">
+            <h1 class="font-serif text-4xl md:text-5xl text-[#2f2438] tracking-tight mb-5 max-w-2xl">
+                Query your academic universe with precision.
+            </h1>
+            <p class="max-w-xl text-[#4b3d59] text-lg mb-12 leading-relaxed">
+                Upload course materials and ask questions to get instant, sourced answers powered by Retrieval-Augmented
+                Generation.
+            </p>
+            <div class="grid md:grid-cols-2 gap-6 w-full max-w-3xl">
+                <div class="bg-[#d2c7dc] p-8 rounded-2xl border border-[#c3b5d1] hover:border-[#b5a3c5] hover:bg-[#c3b5d1]/50 transition-all cursor-pointer text-left group"
+                    onclick="showView('upload')">
+                    <div class="flex items-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="h-6 w-6 text-[#5a4968] group-hover:text-[#4b3d59] transition-colors" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <h3 class="ml-3 font-serif text-xl text-[#2f2438]">Add Data</h3>
+                    </div>
+                    <p class="text-[#4b3d59] text-sm leading-relaxed">Upload PDFs of slides, notes, previous year
+                        questions, or textbooks to expand your knowledge base.</p>
+                </div>
+                <div class="bg-[#d2c7dc] p-8 rounded-2xl border border-[#c3b5d1] hover:border-[#b5a3c5] hover:bg-[#c3b5d1]/50 transition-all cursor-pointer text-left group"
+                    onclick="showView('query')">
+                    <div class="flex items-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="h-6 w-6 text-[#5a4968] group-hover:text-[#4b3d59] transition-colors" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        </svg>
+                        <h3 class="ml-3 font-serif text-xl text-[#2f2438]">Ask Questions</h3>
+                    </div>
+                    <p class="text-[#4b3d59] text-sm leading-relaxed">Interact with your documents. Get answers with
+                        precise citations, page numbers, and relevance scores.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- UPLOAD VIEW -->
+        <div id="upload-view" class="hidden max-w-2xl mx-auto">
+            <div class="bg-[#d2c7dc] rounded-2xl border border-[#c3b5d1] p-8 md:p-10 shadow-sm">
+                <h2 class="font-serif text-2xl text-[#2f2438] mb-8">Upload Document</h2>
+                <form id="upload-form" class="space-y-6">
+                    <div>
+                        <label class="block text-xs font-medium uppercase tracking-wide text-[#4b3d59] mb-2">Course
+                            ID</label>
+                        <input type="text" id="course_id_upload" required
+                            class="w-full px-4 py-3 bg-[#e1d9e8] border border-[#c3b5d1] rounded-lg focus:border-[#b5a3c5] focus:ring-1 focus:ring-[#b5a3c5] transition-all outline-none text-[#2f2438] placeholder-[#5a4968]"
+                            placeholder="e.g., CS101">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium uppercase tracking-wide text-[#4b3d59] mb-2">Document
+                            Title</label>
+                        <input type="text" id="doc_title" required
+                            class="w-full px-4 py-3 bg-[#e1d9e8] border border-[#c3b5d1] rounded-lg focus:border-[#b5a3c5] focus:ring-1 focus:ring-[#b5a3c5] transition-all outline-none text-[#2f2438] placeholder-[#5a4968]"
+                            placeholder="e.g., Intro to Algorithms">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium uppercase tracking-wide text-[#4b3d59] mb-2">Document
+                            Type</label>
+                        <select id="doc_type_upload" required
+                            class="w-full px-4 py-3 bg-[#e1d9e8] border border-[#c3b5d1] rounded-lg focus:border-[#b5a3c5] focus:ring-1 focus:ring-[#b5a3c5] transition-all outline-none text-[#2f2438]">
+                            <option value="slides">Slides</option>
+                            <option value="pyqs">Previous Year Questions (PYQs)</option>
+                            <option value="notes">Notes</option>
+                            <option value="textbook">Textbook</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium uppercase tracking-wide text-[#4b3d59] mb-2">PDF
+                            File</label>
+                        <input type="file" id="file_input" accept=".pdf" required
+                            class="w-full text-sm text-[#4b3d59] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#c3b5d1] file:text-[#2f2438] hover:file:bg-[#5a4968] hover:file:text-[#e1d9e8] cursor-pointer transition-all">
+                    </div>
+                    <button type="submit" id="upload-btn"
+                        class="w-full bg-[#b5a3c5] text-[#2f2438] font-medium py-3 rounded-lg hover:bg-[#5a4968] hover:text-[#e1d9e8] transition-all flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span id="upload-text">Upload & Process</span>
+                    </button>
+                </form>
+                <div id="upload-status" class="mt-6"></div>
+            </div>
+        </div>
+
+        <!-- QUERY VIEW (With Sidebar) -->
+        <div id="query-view" class="hidden max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+
+            <!-- Sidebar -->
+            <div class="md:col-span-1 bg-[#d2c7dc] rounded-2xl border border-[#c3b5d1] p-4 flex flex-col"
+                style="height: 75vh; min-height: 500px;">
+                <button id="new-chat-btn"
+                    class="w-full bg-[#b5a3c5] text-[#2f2438] font-medium py-2.5 rounded-lg hover:bg-[#5a4968] hover:text-[#e1d9e8] transition-all mb-4 flex items-center justify-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>New Chat</span>
+                </button>
+                <div id="chat-list" class="flex-grow overflow-y-auto space-y-2 pr-1">
+                    <!-- Chats injected here -->
+                </div>
+            </div>
+
+            <!-- Main Chat Area -->
+            <div class="md:col-span-2 bg-[#d2c7dc] rounded-2xl border border-[#c3b5d1] shadow-sm flex flex-col"
+                style="height: 75vh; min-height: 500px;">
+
+                <!-- Active Chat Header -->
+                <div class="border-b border-[#c3b5d1] p-4 flex-shrink-0 flex justify-between items-center"
+                    id="chat-header">
+                    <div class="flex flex-col">
+                        <span id="active-chat-title"
+                            class="font-serif text-lg text-[#2f2438] truncate max-w-[200px] md:max-w-md">Select or start
+                            a chat</span>
+                        <span id="active-course-id" class="text-xs text-[#5a4968]"></span>
+                    </div>
+                    <button id="rag-toggle-btn"
+                        class="text-xs px-3 py-1.5 rounded-full border border-[#c3b5d1] bg-[#e1d9e8] text-[#5a4968] flex items-center space-x-1.5">
+                        <span class="w-2 h-2 rounded-full bg-[#5a4968]"></span>
+                        <span>RAG: OFF</span>
+                    </button>
+                </div>
+
+                <!-- Chat Area -->
+                <div id="chat-box" class="flex-grow overflow-y-auto p-6 space-y-6">
+                    <div class="text-center text-[#5a4968] text-sm mt-10">
+                        <p>Click "New Chat" to start querying your materials.</p>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="border-t border-[#c3b5d1] p-4 flex-shrink-0">
+                    <form id="query-form" class="flex space-x-3 items-center">
+                        <input type="text" id="question_input" required
+                            class="flex-1 px-4 py-3 bg-[#e1d9e8] border border-[#c3b5d1] rounded-xl focus:border-[#b5a3c5] focus:ring-1 focus:ring-[#b5a3c5] transition-all outline-none text-[#2f2438] placeholder-[#5a4968] disabled:opacity-50"
+                            placeholder="Select a chat to type..." disabled>
+                        <button type="submit" id="ask-btn" disabled
+                            class="bg-[#b5a3c5] text-[#2f2438] font-medium p-3 rounded-xl hover:bg-[#5a4968] hover:text-[#e1d9e8] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path
+                                    d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- New Chat Modal -->
+    <div id="new-chat-modal"
+        class="hidden fixed inset-0 bg-[#2f2438]/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-[#d2c7dc] rounded-2xl border border-[#c3b5d1] p-8 max-w-md w-full shadow-xl pop-in">
+            <h2 class="font-serif text-2xl text-[#2f2438] mb-6">Start New Chat</h2>
+            <form id="new-chat-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium uppercase tracking-wide text-[#4b3d59] mb-2">Course
+                        ID</label>
+                    <input type="text" id="new-course-id" required
+                        class="w-full px-4 py-2.5 bg-[#e1d9e8] border border-[#c3b5d1] rounded-lg focus:border-[#b5a3c5] outline-none text-[#2f2438] placeholder-[#5a4968]"
+                        placeholder="e.g., CS101">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium uppercase tracking-wide text-[#4b3d59] mb-2">Chat Title
+                        (Optional)</label>
+                    <input type="text" id="new-chat-title"
+                        class="w-full px-4 py-2.5 bg-[#e1d9e8] border border-[#c3b5d1] rounded-lg focus:border-[#b5a3c5] outline-none text-[#2f2438] placeholder-[#5a4968]"
+                        placeholder="e.g., Midterm Prep">
+                </div>
+                <div class="flex items-center space-x-2 pt-2">
+                    <input type="checkbox" id="new-rag-enable" checked
+                        class="rounded bg-[#e1d9e8] border-[#c3b5d1] text-[#b5a3c5] focus:ring-[#b5a3c5]">
+                    <label for="new-rag-enable" class="text-sm text-[#4b3d59]">Enable RAG (Retrieve from DB)</label>
+                </div>
+                <div class="flex space-x-3 pt-4">
+                    <button type="button" onclick="closeModal()"
+                        class="flex-1 py-2.5 text-[#4b3d59] hover:bg-[#c3b5d1] rounded-lg transition-all">Cancel</button>
+                    <button type="submit"
+                        class="flex-1 py-2.5 bg-[#b5a3c5] text-[#2f2438] font-medium rounded-lg hover:bg-[#5a4968] hover:text-[#e1d9e8] transition-all">Create
+                        Chat</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="py-6 text-center text-xs text-[#5a4968] border-t border-[#c3b5d1] mt-auto">
+        Academic Archives &middot; Powered by FastAPI & RAG
+    </footer>
+
+    <script>
+        // Configure marked
+        marked.setOptions({
+            breaks: true,
+            gfm: true
+        });
+
+        // Global State
+        let currentChatId = null;
+
+        // View Navigation
+        function showView(view) {
+            document.querySelectorAll('[id$="view"]').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('fade-in-up');
+            });
+            const el = document.getElementById(view + '-view');
+            el.classList.remove('hidden');
+            void el.offsetWidth;
+            el.classList.add('fade-in-up');
+
+            if (view === 'query') {
+                loadChats();
+            }
+        }
+
+        // --- Upload Logic ---
+        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('upload-btn');
+            const btnText = document.getElementById('upload-text');
+            const statusDiv = document.getElementById('upload-status');
+
+            const formData = new FormData();
+            formData.append("file", document.getElementById('file_input').files[0]);
+            formData.append("course_id", document.getElementById('course_id_upload').value);
+            formData.append("doc_title", document.getElementById('doc_title').value);
+            formData.append("doc_type", document.getElementById('doc_type_upload').value);
+
+            btn.disabled = true;
+            btnText.innerHTML = 'Processing...';
+            statusDiv.innerHTML = '';
+
+            try {
+                const res = await fetch('/add', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (!res.ok) throw new Error(data.detail || 'Upload failed');
+
+                statusDiv.innerHTML = `<div class="bg-[#e1d9e8] text-[#2f2438] p-4 rounded-lg border border-[#b5a3c5] text-sm pop-in">Success! Document processed. ${data.pages_extracted} pages extracted.</div>`;
+                e.target.reset();
+            } catch (err) {
+                statusDiv.innerHTML = `<div class="bg-[#e1d9e8] text-red-700 p-4 rounded-lg border border-red-300 text-sm pop-in">Error: ${err.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = 'Upload & Process';
+            }
+        });
+
+        // --- Chat Management Logic ---
+        document.getElementById('new-chat-btn').addEventListener('click', () => {
+            document.getElementById('new-chat-modal').classList.remove('hidden');
+        });
+
+        function closeModal() {
+            document.getElementById('new-chat-modal').classList.add('hidden');
+        }
+
+        document.getElementById('new-chat-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const courseId = document.getElementById('new-course-id').value;
+            const title = document.getElementById('new-chat-title').value;
+            const ragEnable = document.getElementById('new-rag-enable').checked;
+
+            try {
+                const res = await fetch('/chats', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ course_id: courseId, title: title || undefined, rag_enable: ragEnable })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Failed to create chat');
+
+                closeModal();
+                await loadChats();
+                selectChat(data.chat_id);
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+
+        async function loadChats() {
+            try {
+                const res = await fetch('/chats');
+                const chats = await res.json();
+                const chatList = document.getElementById('chat-list');
+                chatList.innerHTML = '';
+
+                if (chats.length === 0) {
+                    chatList.innerHTML = '<p class="text-center text-[#5a4968] text-xs mt-4">No chats yet.</p>';
+                    return;
+                }
+
+                chats.forEach(chat => {
+                    const chatEl = document.createElement('div');
+                    chatEl.className = `p-3 rounded-lg cursor-pointer flex justify-between items-center group transition-all ${chat.chat_id === currentChatId ? 'bg-[#c3b5d1]' : 'hover:bg-[#e1d9e8]'}`;
+                    chatEl.innerHTML = `
+                        <div class="flex flex-col overflow-hidden" onclick="selectChat('${chat.chat_id}')">
+                            <span class="text-sm font-medium text-[#2f2438] truncate">${chat.title}</span>
+                            <span class="text-xs text-[#5a4968]">${chat.course_id}</span>
+                        </div>
+                        <button class="text-[#5a4968] hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all p-1" onclick="deleteChat('${chat.chat_id}', event)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3" />
+                            </svg>
+                        </button>
+                    `;
+                    chatList.appendChild(chatEl);
+                });
+            } catch (err) {
+                console.error("Error loading chats:", err);
+            }
+        }
+
+        async function selectChat(chatId) {
+            currentChatId = chatId;
+
+            // Enable input
+            document.getElementById('question_input').disabled = false;
+            document.getElementById('ask-btn').disabled = false;
+            document.getElementById('question_input').placeholder = "Type your question here...";
+
+            try {
+                const res = await fetch(`/chats/${chatId}`);
+                const data = await res.json();
+                const meta = data.meta;
+                const messages = data.messages;
+
+                // Update header
+                document.getElementById('active-chat-title').textContent = meta.title;
+                document.getElementById('active-course-id').textContent = `Course: ${meta.course_id}`;
+                updateRagToggle(meta.rag_enable, chatId);
+
+                // Render messages
+                const chatBox = document.getElementById('chat-box');
+                chatBox.innerHTML = '';
+
+                if (messages.length === 0) {
+                    chatBox.innerHTML = '<div class="text-center text-[#5a4968] text-sm mt-10"><p>Ask a question about your uploaded materials.</p></div>';
+                } else {
+                    messages.forEach(msg => {
+                        appendMessage(msg.role, msg.content, msg.source_refs || []);
+                    });
+                }
+
+                loadChats(); // Refresh sidebar to highlight active chat
+            } catch (err) {
+                console.error("Error loading chat:", err);
+            }
+        }
+
+        async function deleteChat(chatId, event) {
+            event.stopPropagation();
+            if (!confirm('Are you sure you want to delete this chat?')) return;
+
+            try {
+                await fetch(`/chats/${chatId}`, { method: 'DELETE' });
+                if (currentChatId === chatId) {
+                    currentChatId = null;
+                    document.getElementById('chat-box').innerHTML = '<div class="text-center text-[#5a4968] text-sm mt-10"><p>Select or start a new chat.</p></div>';
+                    document.getElementById('active-chat-title').textContent = "Select or start a chat";
+                    document.getElementById('active-course-id').textContent = "";
+                    document.getElementById('question_input').disabled = true;
+                    document.getElementById('ask-btn').disabled = true;
+                }
+                loadChats();
+            } catch (err) {
+                alert('Failed to delete chat');
+            }
+        }
+
+        // --- RAG Toggle Logic ---
+        document.getElementById('rag-toggle-btn').addEventListener('click', async () => {
+            if (!currentChatId) return;
+            try {
+                const res = await fetch(`/chats/${currentChatId}/rag`, { method: 'PATCH' });
+                const data = await res.json();
+                if (!res.ok) throw new Error('Failed to toggle RAG');
+                updateRagToggle(data.rag_enabled, currentChatId);
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        function updateRagToggle(isEnabled, chatId) {
+            const btn = document.getElementById('rag-toggle-btn');
+            if (currentChatId !== chatId) return; // Prevent race conditions
+
+            if (isEnabled) {
+                btn.classList.remove('bg-[#e1d9e8]', 'text-[#5a4968]', 'border-[#c3b5d1]');
+                btn.classList.add('bg-green-100', 'text-green-700', 'border-green-400');
+                btn.innerHTML = `<span class="w-2 h-2 rounded-full bg-green-500"></span><span>RAG: ON</span>`;
+            } else {
+                btn.classList.add('bg-[#e1d9e8]', 'text-[#5a4968]', 'border-[#c3b5d1]');
+                btn.classList.remove('bg-green-100', 'text-green-700', 'border-green-400');
+                btn.innerHTML = `<span class="w-2 h-2 rounded-full bg-[#5a4968]"></span><span>RAG: OFF</span>`;
+            }
+        }
+
+        // --- Messaging Logic ---
+        document.getElementById('query-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const question = document.getElementById('question_input').value;
+            const btn = document.getElementById('ask-btn');
+
+            appendMessage('user', question);
+            document.getElementById('question_input').value = '';
+            btn.disabled = true;
+            document.getElementById('question_input').disabled = true;
+
+            const typingIndicator = appendTypingIndicator();
+
+            try {
+                const res = await fetch(`/chats/${currentChatId}/message`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: question })
+                });
+                const data = await res.json();
+
+                typingIndicator.remove();
+
+                if (!res.ok) throw new Error(data.detail || 'Query failed');
+
+                appendMessage('assistant', data.answer, data.source_refs);
+
+            } catch (err) {
+                typingIndicator.remove();
+                appendMessage('assistant', `Error: ${err.message}`, []);
+            } finally {
+                btn.disabled = false;
+                document.getElementById('question_input').disabled = false;
+                document.getElementById('question_input').focus();
+            }
+        });
+
+        function appendTypingIndicator() {
+            const chatBox = document.getElementById('chat-box');
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex justify-start pop-in';
+            wrapper.innerHTML = `
+                <div class="bg-[#e1d9e8] border border-[#c3b5d1] rounded-2xl px-5 py-4 flex items-center space-x-2">
+                    <div class="w-2 h-2 bg-[#4b3d59] rounded-full typing-dot"></div>
+                    <div class="w-2 h-2 bg-[#4b3d59] rounded-full typing-dot"></div>
+                    <div class="w-2 h-2 bg-[#4b3d59] rounded-full typing-dot"></div>
+                </div>
+            `;
+            chatBox.appendChild(wrapper);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return wrapper;
+        }
+
+        function appendMessage(role, content, sources = []) {
+            const chatBox = document.getElementById('chat-box');
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} pop-in w-full`;
+
+            let sourcesHtml = '';
+            if (sources.length > 0) {
+                sourcesHtml = `
+                    <div class="sources-content hidden mt-4 pt-4 border-t border-[#c3b5d1]">
+                        <div class="space-y-2">
+                            ${sources.map(s => `
+                                <div class="text-xs bg-[#e1d9e8] rounded-md p-3 border border-[#c3b5d1] flex justify-between items-center">
+                                    <div>
+                                        <span class="font-medium text-[#2f2438]">${s.doc_title}</span>
+                                        <span class="text-[#4b3d59] ml-1">(Pg ${s.page} &middot; ${s.doc_type})</span>
+                                    </div>
+                                    <span class="text-[#5a4968] font-medium">${(s.relevance_score * 100).toFixed(1)}%</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            let innerHtml = '';
+            if (role === 'user') {
+                innerHtml = `
+                    <div class="max-w-[80%] bg-[#b5a3c5] text-[#2f2438] rounded-2xl rounded-br-md px-5 py-3 shadow-sm">
+                        <p class="text-[15px] leading-7 whitespace-pre-wrap">${escapeHtml(content)}</p>
+                    </div>
+                `;
+            } else {
+                const renderedContent = marked.parse(content);
+                const sourcesBtn = sources.length > 0 ? `
+                    <button onclick="toggleSources(this)" class="mt-3 text-xs font-medium text-[#4b3d59] hover:text-[#2f2438] flex items-center space-x-1.5 bg-[#e1d9e8] hover:bg-[#c3b5d1] border border-[#c3b5d1] px-3 py-1.5 rounded-full transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
+                        <span>Show sources (${sources.length})</span>
+                    </button>
+                ` : '';
+
+                innerHtml = `
+                    <div class="max-w-[85%] w-full lg:max-w-[80%]">
+                        <div class="text-[#2f2438] markdown-body">
+                            ${renderedContent}
+                        </div>
+                        ${sourcesBtn}
+                        ${sourcesHtml}
+                    </div>
+                `;
+            }
+
+            wrapper.innerHTML = innerHtml;
+            chatBox.appendChild(wrapper);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function toggleSources(btn) {
+            const sourcesDiv = btn.nextElementSibling;
+            if (!sourcesDiv) return;
+
+            const isHidden = sourcesDiv.classList.toggle('hidden');
+            const textSpan = btn.querySelector('span');
+
+            if (textSpan) {
+                if (isHidden) {
+                    textSpan.textContent = textSpan.textContent.replace('Hide', 'Show');
+                } else {
+                    textSpan.textContent = textSpan.textContent.replace('Show', 'Hide');
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

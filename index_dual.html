@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Archives</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Apply theme before page loads to prevent flashing -->
+    <script>
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.add('light');
+        }
+    </script>
+
+    <style>
+        /* CSS Variables for Theming */
+        :root {
+            --bg-body: #0f141d;
+            --bg-card: #252b33;
+            --bg-input: #1e232b;
+            --bg-hover: #2c333d;
+            --border-main: #2c333d;
+            --border-hover: #627188;
+            --scrollbar: #475061;
+            --scrollbar-hover: #627188;
+
+            --text-main: #d2d3e1;
+            --text-heading: #e8e9f0;
+            --text-muted: #98a1b4;
+            --text-dim: #7d899e;
+
+            --accent: #627188;
+            --accent-hover: #7d899e;
+
+            --code-bg: #1e232b;
+            --code-border: #2c333d;
+            --rag-on-bg: rgba(74, 222, 128, 0.2);
+            --rag-on-text: #4ade80;
+            --rag-on-border: #16a34a;
+            --rag-off-bg: #1e232b;
+            --rag-off-text: #7d899e;
+        }
+
+        .light {
+            --bg-body: #f0ecf3;
+            --bg-card: #d2c7dc;
+            --bg-input: #e1d9e8;
+            --bg-hover: #c3b5d1;
+            --border-main: #c3b5d1;
+            --border-hover: #b5a3c5;
+            --scrollbar: #b5a3c5;
+            --scrollbar-hover: #b5a3c5;
+
+            --text-main: #2f2438;
+            --text-heading: #241b2b;
+            --text-muted: #4b3d59;
+            --text-dim: #5a4968;
+
+            --accent: #b5a3c5;
+            --accent-hover: #5a4968;
+
+            --code-bg: #e1d9e8;
+            --code-border: #c3b5d1;
+            --rag-on-bg: rgba(34, 197, 94, 0.2);
+            --rag-on-text: #15803d;
+            --rag-on-border: #22c55e;
+            --rag-off-bg: #e1d9e8;
+            --rag-off-text: #5a4968;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            transition: background-color 0.3s ease;
+        }
+
+        .font-serif {
+            font-family: 'Lora', serif;
+        }
+
+        /* Animations */
+        .fade-in-up {
+            animation: fadeInUp 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pop-in {
+            animation: popIn 0.3s ease-out forwards;
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--scrollbar);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--scrollbar-hover);
+        }
+
+        /* Typing Indicator */
+        .typing-dot {
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+                opacity: 0.3;
+            }
+
+            30% {
+                transform: translateY(-4px);
+                opacity: 1;
+            }
+        }
+
+        /* Markdown Styles */
+        .markdown-body {
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--text-main);
+        }
+
+        .markdown-body p {
+            margin-bottom: 0.75em;
+        }
+
+        .markdown-body p:last-child {
+            margin-bottom: 0;
+        }
+
+        .markdown-body strong {
+            color: var(--text-heading);
+            font-weight: 600;
+        }
+
+        .markdown-body em {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .markdown-body h1,
+        .markdown-body h2,
+        .markdown-body h3,
+        .markdown-body h4 {
+            font-family: 'Lora', serif;
+            color: var(--text-heading);
+            font-weight: 600;
+            margin-top: 1.25em;
+            margin-bottom: 0.5em;
+        }
+
+        .markdown-body h1 {
+            font-size: 1.35em;
+        }
+
+        .markdown-body h2 {
+            font-size: 1.2em;
+        }
+
+        .markdown-body h3 {
+            font-size: 1.05em;
+        }
+
+        .markdown-body h1:first-child,
+        .markdown-body h2:first-child,
+        .markdown-body h3:first-child {
+            margin-top: 0;
+        }
+
+        .markdown-body ul,
+        .markdown-body ol {
+            margin: 0.6em 0;
+            padding-left: 1.5em;
+        }
+
+        .markdown-body ul {
+            list-style-type: disc;
+        }
+
+        .markdown-body ol {
+            list-style-type: decimal;
+        }
+
+        .markdown-body li {
+            margin-bottom: 0.35em;
+            padding-left: 0.2em;
+        }
+
+        .markdown-body li p {
+            margin-bottom: 0.25em;
+        }
+
+        .markdown-body code {
+            background: var(--code-bg);
+            border: 1px solid var(--code-border);
+            padding: 0.15em 0.4em;
+            border-radius: 4px;
+            font-size: 0.875em;
+            color: var(--text-main);
+            font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+        }
+
+        .markdown-body pre {
+            background: var(--code-bg);
+            border: 1px solid var(--code-border);
+            border-radius: 8px;
+            padding: 1em;
+            overflow-x: auto;
+            margin: 0.75em 0;
+        }
+
+        .markdown-body pre code {
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 0.85em;
+            line-height: 1.6;
+        }
+
+        .markdown-body blockquote {
+            border-left: 3px solid var(--border-hover);
+            padding-left: 1em;
+            margin: 0.75em 0;
+            color: var(--text-muted);
+        }
+
+        .markdown-body a {
+            color: var(--text-muted);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .markdown-body a:hover {
+            color: var(--text-main);
+        }
+
+        .markdown-body hr {
+            border: none;
+            border-top: 1px solid var(--code-border);
+            margin: 1.25em 0;
+        }
+
+        .markdown-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.75em 0;
+            font-size: 0.9em;
+        }
+
+        .markdown-body th,
+        .markdown-body td {
+            border: 1px solid var(--code-border);
+            padding: 0.5em 0.75em;
+            text-align: left;
+        }
+
+        .markdown-body th {
+            background: var(--code-bg);
+            font-weight: 600;
+            color: var(--text-heading);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="backdrop-blur-md border-b sticky top-0 z-40"
+        style="background-color: var(--bg-card); border-color: var(--border-main);">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2 cursor-pointer group" onclick="showView('landing')">
+                <div class="w-7 h-7 rounded-md flex items-center justify-center font-bold text-sm transition-colors"
+                    style="background-color: var(--accent); color: var(--bg-card);">
+                    A
+                </div>
+                <span class="font-serif text-xl font-medium tracking-tight" style="color: var(--text-heading);">Academic
+                    Archives</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="showView('upload')" class="px-4 py-2 text-sm font-medium rounded-lg transition-all"
+                    style="color: var(--text-muted);"
+                    onmouseover="this.style.backgroundColor='var(--bg-hover)'; this.style.color='var(--text-heading)';"
+                    onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--text-muted)';">
+                    Add Data
+                </button>
+                <button onclick="showView('query')" class="px-4 py-2 text-sm font-medium rounded-lg transition-all"
+                    style="color: var(--text-muted);"
+                    onmouseover="this.style.backgroundColor='var(--bg-hover)'; this.style.color='var(--text-heading)';"
+                    onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--text-muted)';">
+                    Ask Questions
+                </button>
+
+                <!-- Theme Toggle Button -->
+                <button id="theme-toggle" onclick="toggleTheme()" class="p-2 rounded-lg transition-all"
+                    style="color: var(--text-muted);" onmouseover="this.style.backgroundColor='var(--bg-hover)';"
+                    onmouseout="this.style.backgroundColor='transparent';">
+                    <svg id="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden"
+                        viewBox="0 0 20 20" fill="currentColor">
+                        <path
+                            d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" />
+                    </svg>
+                    <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-6xl w-full mx-auto px-6 py-10">
+
+        <!-- LANDING VIEW -->
+        <div id="landing-view" class="fade-in-up flex flex-col items-center text-center py-16">
+            <h1 class="font-serif text-4xl md:text-5xl tracking-tight mb-5 max-w-2xl"
+                style="color: var(--text-heading);">
+                Query your academic universe with precision.
+            </h1>
+            <p class="max-w-xl text-lg mb-12 leading-relaxed" style="color: var(--text-muted);">
+                Upload course materials and ask questions to get instant, sourced answers powered by Retrieval-Augmented
+                Generation.
+            </p>
+            <div class="grid md:grid-cols-2 gap-6 w-full max-w-3xl">
+                <div class="p-8 rounded-2xl border hover:bg-opacity-50 transition-all cursor-pointer text-left group"
+                    style="background-color: var(--bg-card); border-color: var(--border-main);"
+                    onmouseover="this.style.borderColor='var(--border-hover)'; this.style.backgroundColor='var(--bg-hover)';"
+                    onmouseout="this.style.borderColor='var(--border-main)'; this.style.backgroundColor='var(--bg-card)';"
+                    onclick="showView('upload')">
+                    <div class="flex items-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-colors"
+                            style="color: var(--text-dim);" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <h3 class="ml-3 font-serif text-xl" style="color: var(--text-heading);">Add Data</h3>
+                    </div>
+                    <p class="text-sm leading-relaxed" style="color: var(--text-muted);">Upload PDFs of slides, notes,
+                        previous year questions, or textbooks to expand your knowledge base.</p>
+                </div>
+                <div class="p-8 rounded-2xl border hover:bg-opacity-50 transition-all cursor-pointer text-left group"
+                    style="background-color: var(--bg-card); border-color: var(--border-main);"
+                    onmouseover="this.style.borderColor='var(--border-hover)'; this.style.backgroundColor='var(--bg-hover)';"
+                    onmouseout="this.style.borderColor='var(--border-main)'; this.style.backgroundColor='var(--bg-card)';"
+                    onclick="showView('query')">
+                    <div class="flex items-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-colors"
+                            style="color: var(--text-dim);" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        </svg>
+                        <h3 class="ml-3 font-serif text-xl" style="color: var(--text-heading);">Ask Questions</h3>
+                    </div>
+                    <p class="text-sm leading-relaxed" style="color: var(--text-muted);">Interact with your documents.
+                        Get answers with precise citations, page numbers, and relevance scores.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- UPLOAD VIEW -->
+        <div id="upload-view" class="hidden max-w-2xl mx-auto">
+            <div class="rounded-2xl border p-8 md:p-10 shadow-sm"
+                style="background-color: var(--bg-card); border-color: var(--border-main);">
+                <h2 class="font-serif text-2xl mb-8" style="color: var(--text-heading);">Upload Document</h2>
+                <form id="upload-form" class="space-y-6">
+                    <div>
+                        <label class="block text-xs font-medium uppercase tracking-wide mb-2"
+                            style="color: var(--text-muted);">Course ID</label>
+                        <input type="text" id="course_id_upload" required
+                            class="w-full px-4 py-3 border rounded-lg outline-none transition-all"
+                            style="background-color: var(--bg-input); border-color: var(--border-main); color: var(--text-main);"
+                            placeholder="e.g., CS101">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium uppercase tracking-wide mb-2"
+                            style="color: var(--text-muted);">Document Title</label>
+                        <input type="text" id="doc_title" required
+                            class="w-full px-4 py-3 border rounded-lg outline-none transition-all"
+                            style="background-color: var(--bg-input); border-color: var(--border-main); color: var(--text-main);"
+                            placeholder="e.g., Intro to Algorithms">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium uppercase tracking-wide mb-2"
+                            style="color: var(--text-muted);">Document Type</label>
+                        <select id="doc_type_upload" required
+                            class="w-full px-4 py-3 border rounded-lg outline-none transition-all"
+                            style="background-color: var(--bg-input); border-color: var(--border-main); color: var(--text-main);">
+                            <option value="slides">Slides</option>
+                            <option value="pyqs">Previous Year Questions (PYQs)</option>
+                            <option value="notes">Notes</option>
+                            <option value="textbook">Textbook</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium uppercase tracking-wide mb-2"
+                            style="color: var(--text-muted);">PDF File</label>
+                        <input type="file" id="file_input" accept=".pdf" required
+                            class="w-full text-sm cursor-pointer transition-all" style="color: var(--text-muted);">
+                    </div>
+                    <button type="submit" id="upload-btn"
+                        class="w-full font-medium py-3 rounded-lg transition-all flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                        style="background-color: var(--accent); color: var(--text-heading);">
+                        <span id="upload-text">Upload & Process</span>
+                    </button>
+                </form>
+                <div id="upload-status" class="mt-6"></div>
+            </div>
+        </div>
+
+        <!-- QUERY VIEW -->
+        <div id="query-view" class="hidden max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Sidebar -->
+            <div class="md:col-span-1 rounded-2xl border p-4 flex flex-col"
+                style="background-color: var(--bg-card); border-color: var(--border-main); height: 75vh; min-height: 500px;">
+                <button id="new-chat-btn"
+                    class="w-full font-medium py-2.5 rounded-lg transition-all mb-4 flex items-center justify-center space-x-2"
+                    style="background-color: var(--accent); color: var(--text-heading);">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>New Chat</span>
+                </button>
+                <div id="chat-list" class="flex-grow overflow-y-auto space-y-2 pr-1"></div>
+            </div>
+
+            <!-- Main Chat Area -->
+            <div class="md:col-span-2 rounded-2xl border shadow-sm flex flex-col"
+                style="background-color: var(--bg-card); border-color: var(--border-main); height: 75vh; min-height: 500px;">
+                <div class="border-b p-4 flex-shrink-0 flex justify-between items-center" id="chat-header"
+                    style="border-color: var(--border-main);">
+                    <div class="flex flex-col">
+                        <span id="active-chat-title" class="font-serif text-lg truncate max-w-[200px] md:max-w-md"
+                            style="color: var(--text-heading);">Select or start a chat</span>
+                        <span id="active-course-id" class="text-xs" style="color: var(--text-dim);"></span>
+                    </div>
+                    <button id="rag-toggle-btn"
+                        class="text-xs px-3 py-1.5 rounded-full border flex items-center space-x-1.5"
+                        style="border-color: var(--border-main); background-color: var(--rag-off-bg); color: var(--rag-off-text);">
+                        <span class="w-2 h-2 rounded-full" style="background-color: var(--rag-off-text);"></span>
+                        <span>RAG: OFF</span>
+                    </button>
+                </div>
+
+                <div id="chat-box" class="flex-grow overflow-y-auto p-6 space-y-6">
+                    <div class="text-center text-sm mt-10" style="color: var(--text-dim);">
+                        <p>Click "New Chat" to start querying your materials.</p>
+                    </div>
+                </div>
+
+                <div class="border-t p-4 flex-shrink-0" style="border-color: var(--border-main);">
+                    <form id="query-form" class="flex space-x-3 items-center">
+                        <input type="text" id="question_input" required disabled
+                            class="flex-1 px-4 py-3 border rounded-xl outline-none transition-all disabled:opacity-50"
+                            style="background-color: var(--bg-input); border-color: var(--border-main); color: var(--text-main);"
+                            placeholder="Select a chat to type...">
+                        <button type="submit" id="ask-btn" disabled
+                            class="font-medium p-3 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            style="background-color: var(--accent); color: var(--text-heading);">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path
+                                    d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- New Chat Modal -->
+    <div id="new-chat-modal"
+        class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="rounded-2xl border p-8 max-w-md w-full shadow-xl pop-in"
+            style="background-color: var(--bg-card); border-color: var(--border-main);">
+            <h2 class="font-serif text-2xl mb-6" style="color: var(--text-heading);">Start New Chat</h2>
+            <form id="new-chat-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium uppercase tracking-wide mb-2"
+                        style="color: var(--text-muted);">Course ID</label>
+                    <input type="text" id="new-course-id" required
+                        class="w-full px-4 py-2.5 border rounded-lg outline-none"
+                        style="background-color: var(--bg-input); border-color: var(--border-main); color: var(--text-main);"
+                        placeholder="e.g., CS101">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium uppercase tracking-wide mb-2"
+                        style="color: var(--text-muted);">Chat Title (Optional)</label>
+                    <input type="text" id="new-chat-title" class="w-full px-4 py-2.5 border rounded-lg outline-none"
+                        style="background-color: var(--bg-input); border-color: var(--border-main); color: var(--text-main);"
+                        placeholder="e.g., Midterm Prep">
+                </div>
+                <div class="flex items-center space-x-2 pt-2">
+                    <input type="checkbox" id="new-rag-enable" checked class="rounded">
+                    <label for="new-rag-enable" class="text-sm" style="color: var(--text-muted);">Enable RAG (Retrieve
+                        from DB)</label>
+                </div>
+                <div class="flex space-x-3 pt-4">
+                    <button type="button" onclick="closeModal()" class="flex-1 py-2.5 rounded-lg transition-all"
+                        style="color: var(--text-muted);" onmouseover="this.style.backgroundColor='var(--bg-hover)';"
+                        onmouseout="this.style.backgroundColor='transparent';">Cancel</button>
+                    <button type="submit" class="flex-1 py-2.5 font-medium rounded-lg transition-all"
+                        style="background-color: var(--accent); color: var(--text-heading);">Create Chat</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="py-6 text-center text-xs border-t mt-auto"
+        style="color: var(--text-dim); border-color: var(--border-main);">
+        Academic Archives &middot; Powered by FastAPI & RAG
+    </footer>
+
+    <script>
+        // Configure marked
+        marked.setOptions({ breaks: true, gfm: true });
+
+        // Global State
+        let currentChatId = null;
+
+        // Theme Logic
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isLight = html.classList.toggle('light');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            updateThemeIcon(isLight);
+        }
+
+        function updateThemeIcon(isLight) {
+            document.getElementById('theme-icon-sun').classList.toggle('hidden', !isLight);
+            document.getElementById('theme-icon-moon').classList.toggle('hidden', isLight);
+        }
+
+        // Set initial icon state based on saved theme
+        updateThemeIcon(localStorage.getItem('theme') === 'light');
+
+        // View Navigation
+        function showView(view) {
+            document.querySelectorAll('[id$="view"]').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('fade-in-up');
+            });
+            const el = document.getElementById(view + '-view');
+            el.classList.remove('hidden');
+            void el.offsetWidth;
+            el.classList.add('fade-in-up');
+
+            if (view === 'query') {
+                loadChats();
+            }
+        }
+
+        // --- Upload Logic ---
+        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('upload-btn');
+            const btnText = document.getElementById('upload-text');
+            const statusDiv = document.getElementById('upload-status');
+
+            const formData = new FormData();
+            formData.append("file", document.getElementById('file_input').files[0]);
+            formData.append("course_id", document.getElementById('course_id_upload').value);
+            formData.append("doc_title", document.getElementById('doc_title').value);
+            formData.append("doc_type", document.getElementById('doc_type_upload').value);
+
+            btn.disabled = true;
+            btnText.innerHTML = 'Processing...';
+            statusDiv.innerHTML = '';
+
+            try {
+                const res = await fetch('/add', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Upload failed');
+
+                statusDiv.innerHTML = `<div class="p-4 rounded-lg border text-sm pop-in" style="background-color: var(--bg-input); color: var(--text-main); border-color: var(--border-hover);">Success! Document processed. ${data.pages_extracted} pages extracted.</div>`;
+                e.target.reset();
+            } catch (err) {
+                statusDiv.innerHTML = `<div class="p-4 rounded-lg border text-sm pop-in" style="background-color: var(--bg-input); color: #ef4444; border-color: #ef4444;">Error: ${err.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = 'Upload & Process';
+            }
+        });
+
+        // --- Chat Management Logic ---
+        document.getElementById('new-chat-btn').addEventListener('click', () => {
+            document.getElementById('new-chat-modal').classList.remove('hidden');
+        });
+
+        function closeModal() {
+            document.getElementById('new-chat-modal').classList.add('hidden');
+        }
+
+        document.getElementById('new-chat-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const courseId = document.getElementById('new-course-id').value;
+            const title = document.getElementById('new-chat-title').value;
+            const ragEnable = document.getElementById('new-rag-enable').checked;
+
+            try {
+                const res = await fetch('/chats', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ course_id: courseId, title: title || undefined, rag_enable: ragEnable })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Failed to create chat');
+
+                closeModal();
+                await loadChats();
+                selectChat(data.chat_id);
+            } catch (err) {
+                alert(err.message);
+            }
+        });
+
+        async function loadChats() {
+            try {
+                const res = await fetch('/chats');
+                const chats = await res.json();
+                const chatList = document.getElementById('chat-list');
+                chatList.innerHTML = '';
+
+                if (chats.length === 0) {
+                    chatList.innerHTML = `<p class="text-center text-xs mt-4" style="color: var(--text-dim);">No chats yet.</p>`;
+                    return;
+                }
+
+                chats.forEach(chat => {
+                    const chatEl = document.createElement('div');
+                    chatEl.className = `p-3 rounded-lg cursor-pointer flex justify-between items-center group transition-all`;
+                    chatEl.style.backgroundColor = chat.chat_id === currentChatId ? 'var(--bg-hover)' : 'transparent';
+                    chatEl.innerHTML = `
+                        <div class="flex flex-col overflow-hidden" onclick="selectChat('${chat.chat_id}')">
+                            <span class="text-sm font-medium truncate" style="color: var(--text-main);">${chat.title}</span>
+                            <span class="text-xs" style="color: var(--text-dim);">${chat.course_id}</span>
+                        </div>
+                        <button class="opacity-0 group-hover:opacity-100 transition-all p-1" style="color: var(--text-dim);" onclick="deleteChat('${chat.chat_id}', event)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3" />
+                            </svg>
+                        </button>
+                    `;
+                    chatEl.onmouseover = () => chatEl.style.backgroundColor = 'var(--bg-hover)';
+                    chatEl.onmouseout = () => chatEl.style.backgroundColor = chat.chat_id === currentChatId ? 'var(--bg-hover)' : 'transparent';
+                    chatList.appendChild(chatEl);
+                });
+            } catch (err) {
+                console.error("Error loading chats:", err);
+            }
+        }
+
+        async function selectChat(chatId) {
+            currentChatId = chatId;
+            document.getElementById('question_input').disabled = false;
+            document.getElementById('ask-btn').disabled = false;
+            document.getElementById('question_input').placeholder = "Type your question here...";
+
+            try {
+                const res = await fetch(`/chats/${chatId}`);
+                const data = await res.json();
+                const meta = data.meta;
+                const messages = data.messages;
+
+                document.getElementById('active-chat-title').textContent = meta.title;
+                document.getElementById('active-course-id').textContent = `Course: ${meta.course_id}`;
+                updateRagToggle(meta.rag_enable, chatId);
+
+                const chatBox = document.getElementById('chat-box');
+                chatBox.innerHTML = '';
+
+                if (messages.length === 0) {
+                    chatBox.innerHTML = `<div class="text-center text-sm mt-10" style="color: var(--text-dim);"><p>Ask a question about your uploaded materials.</p></div>`;
+                } else {
+                    messages.forEach(msg => {
+                        appendMessage(msg.role, msg.content, msg.source_refs || []);
+                    });
+                }
+                loadChats();
+            } catch (err) {
+                console.error("Error loading chat:", err);
+            }
+        }
+
+        async function deleteChat(chatId, event) {
+            event.stopPropagation();
+            if (!confirm('Are you sure you want to delete this chat?')) return;
+
+            try {
+                await fetch(`/chats/${chatId}`, { method: 'DELETE' });
+                if (currentChatId === chatId) {
+                    currentChatId = null;
+                    document.getElementById('chat-box').innerHTML = `<div class="text-center text-sm mt-10" style="color: var(--text-dim);"><p>Select or start a new chat.</p></div>`;
+                    document.getElementById('active-chat-title').textContent = "Select or start a chat";
+                    document.getElementById('active-course-id').textContent = "";
+                    document.getElementById('question_input').disabled = true;
+                    document.getElementById('ask-btn').disabled = true;
+                }
+                loadChats();
+            } catch (err) {
+                alert('Failed to delete chat');
+            }
+        }
+
+        // --- RAG Toggle Logic ---
+        document.getElementById('rag-toggle-btn').addEventListener('click', async () => {
+            if (!currentChatId) return;
+            try {
+                const res = await fetch(`/chats/${currentChatId}/rag`, { method: 'PATCH' });
+                const data = await res.json();
+                if (!res.ok) throw new Error('Failed to toggle RAG');
+                updateRagToggle(data.rag_enabled, currentChatId);
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        function updateRagToggle(isEnabled, chatId) {
+            const btn = document.getElementById('rag-toggle-btn');
+            if (currentChatId !== chatId) return;
+
+            if (isEnabled) {
+                btn.style.backgroundColor = 'var(--rag-on-bg)';
+                btn.style.color = 'var(--rag-on-text)';
+                btn.style.borderColor = 'var(--rag-on-border)';
+                btn.innerHTML = `<span class="w-2 h-2 rounded-full" style="background-color: var(--rag-on-text);"></span><span>RAG: ON</span>`;
+            } else {
+                btn.style.backgroundColor = 'var(--rag-off-bg)';
+                btn.style.color = 'var(--rag-off-text)';
+                btn.style.borderColor = 'var(--border-main)';
+                btn.innerHTML = `<span class="w-2 h-2 rounded-full" style="background-color: var(--rag-off-text);"></span><span>RAG: OFF</span>`;
+            }
+        }
+
+        // --- Messaging Logic ---
+        document.getElementById('query-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const question = document.getElementById('question_input').value;
+            const btn = document.getElementById('ask-btn');
+
+            appendMessage('user', question);
+            document.getElementById('question_input').value = '';
+            btn.disabled = true;
+            document.getElementById('question_input').disabled = true;
+
+            const typingIndicator = appendTypingIndicator();
+
+            try {
+                const res = await fetch(`/chats/${currentChatId}/message`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: question })
+                });
+                const data = await res.json();
+                typingIndicator.remove();
+
+                if (!res.ok) throw new Error(data.detail || 'Query failed');
+                appendMessage('assistant', data.answer, data.source_refs);
+
+            } catch (err) {
+                typingIndicator.remove();
+                appendMessage('assistant', `Error: ${err.message}`, []);
+            } finally {
+                btn.disabled = false;
+                document.getElementById('question_input').disabled = false;
+                document.getElementById('question_input').focus();
+            }
+        });
+
+        function appendTypingIndicator() {
+            const chatBox = document.getElementById('chat-box');
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex justify-start pop-in';
+            wrapper.innerHTML = `
+                <div class="border rounded-2xl px-5 py-4 flex items-center space-x-2" style="background-color: var(--bg-input); border-color: var(--border-main);">
+                    <div class="w-2 h-2 rounded-full typing-dot" style="background-color: var(--text-muted);"></div>
+                    <div class="w-2 h-2 rounded-full typing-dot" style="background-color: var(--text-muted);"></div>
+                    <div class="w-2 h-2 rounded-full typing-dot" style="background-color: var(--text-muted);"></div>
+                </div>
+            `;
+            chatBox.appendChild(wrapper);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return wrapper;
+        }
+
+        function appendMessage(role, content, sources = []) {
+            const chatBox = document.getElementById('chat-box');
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} pop-in w-full`;
+
+            let sourcesHtml = '';
+            if (sources.length > 0) {
+                sourcesHtml = `
+                    <div class="sources-content hidden mt-4 pt-4 border-t" style="border-color: var(--border-main);">
+                        <div class="space-y-2">
+                            ${sources.map(s => `
+                                <div class="text-xs rounded-md p-3 border flex justify-between items-center" style="background-color: var(--bg-input); border-color: var(--border-main);">
+                                    <div>
+                                        <span class="font-medium" style="color: var(--text-main);">${s.doc_title}</span> 
+                                        <span class="ml-1" style="color: var(--text-muted);">(Pg ${s.page} &middot; ${s.doc_type})</span>
+                                    </div>
+                                    <span class="font-medium" style="color: var(--text-dim);">${(s.relevance_score * 100).toFixed(1)}%</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            let innerHtml = '';
+            if (role === 'user') {
+                innerHtml = `
+                    <div class="max-w-[80%] rounded-2xl rounded-br-md px-5 py-3 shadow-sm" style="background-color: var(--accent);">
+                        <p class="text-[15px] leading-7 whitespace-pre-wrap" style="color: var(--text-heading);">${escapeHtml(content)}</p>
+                    </div>
+                `;
+            } else {
+                const renderedContent = marked.parse(content);
+                const sourcesBtn = sources.length > 0 ? `
+                    <button onclick="toggleSources(this)" class="mt-3 text-xs font-medium flex items-center space-x-1.5 border px-3 py-1.5 rounded-full transition-all" style="color: var(--text-muted); background-color: var(--bg-input); border-color: var(--border-main);" onmouseover="this.style.backgroundColor='var(--bg-hover)';" onmouseout="this.style.backgroundColor='var(--bg-input)';">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
+                        <span>Show sources (${sources.length})</span>
+                    </button>
+                ` : '';
+
+                innerHtml = `
+                    <div class="max-w-[85%] w-full lg:max-w-[80%]">
+                        <div class="markdown-body">
+                            ${renderedContent}
+                        </div>
+                        ${sourcesBtn}
+                        ${sourcesHtml}
+                    </div>
+                `;
+            }
+
+            wrapper.innerHTML = innerHtml;
+            chatBox.appendChild(wrapper);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function toggleSources(btn) {
+            const sourcesDiv = btn.nextElementSibling;
+            if (!sourcesDiv) return;
+            const isHidden = sourcesDiv.classList.toggle('hidden');
+            const textSpan = btn.querySelector('span');
+            if (textSpan) {
+                textSpan.textContent = isHidden ? textSpan.textContent.replace('Hide', 'Show') : textSpan.textContent.replace('Show', 'Hide');
+            }
+        }
+    </script>
+</body>
+
+</html>

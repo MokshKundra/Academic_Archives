@@ -1,0 +1,26 @@
+# environment and secrets
+.env
+*.env
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+sn-venv/
+venv/
+env/
+
+# chromadb data
+chroma_db/
+
+# chat data (has your personal content)
+chats/
+
+# poppler (system dependency, not project code)
+# users install this themselves
+
+# misc
+.DS_Store
+Thumbs.db
