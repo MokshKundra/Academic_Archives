@@ -11,6 +11,8 @@ def generate(messages : list[dict]) -> str:
         return _gen_groq(messages)
     elif settings.gen_provider == "huggingface":
         return _gen_huggingface(messages)
+    elif settings.gen_provider == "zai":
+        return _gen_zai(messages)
     
 
 def _gen_ollama(messages : list[dict]) -> str:
@@ -92,4 +94,19 @@ def _gen_huggingface(messages: list[dict]) -> str:
         temperature=0.7
     )
     
+    return response.choices[0].message.content
+
+def _gen_zai(messages: list[dict]) -> str:
+    from openai import OpenAI
+    
+    client = OpenAI(
+        api_key=settings.zai_api_key,
+        base_url="https://api.z.ai/api/paas/v4"
+    )
+
+    response = client.chat.completions.create(
+        model=settings.gen_model_zai,
+        messages=messages
+    )
+
     return response.choices[0].message.content

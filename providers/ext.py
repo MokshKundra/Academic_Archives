@@ -54,7 +54,9 @@ def ext_page(imgb64 : str, extracted_text : str | None) -> str:
      elif settings.ext_provider == "groq" :
          res = _ext_groq(imgb64, prompt)
      elif settings.ext_provider == "huggingface":
-         return _ext_huggingface()
+         res = _ext_huggingface()
+     elif settings.ext_provider == "zai":
+         res = _ext_zai()
      else:
          res = ""
 
@@ -201,3 +203,40 @@ def _ext_huggingface(imgb64: str, prompt: str) -> str:
     except Exception as e:
         print(f"Hugging Face Extraction Error: {e}")
         return ""
+
+
+def _ext_zai(imgb64: str, prompt: str) -> str:
+    from openai import OpenAI
+    
+    client = OpenAI(
+        api_key=settings.zai_api_key,
+        base_url="https://api.z.ai/api/paas/v4"
+    )
+
+    response = client.chat.completions.create(
+        model=settings.ext_model_zai,
+        messages=[
+            {
+                "role": "system",
+                "content": SYSTEM_PROMPT
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{imgb64}"
+                        }
+                    },
+                    {
+                        "type": "text",
+                        "text": prompt
+                    }
+                ]
+            }
+        ],
+        temperature=0
+    )
+
+    return response.choices[0].message.content
