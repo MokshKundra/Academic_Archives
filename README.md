@@ -1,4 +1,4 @@
-Mo# Academic Archices
+# Academic Archices
 
 A local RAG (Retrieval-Augmented Generation) system for course materials.
 Upload lecture slides, past year papers, notes, and textbooks — then chat with them.
