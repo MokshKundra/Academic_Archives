@@ -14,7 +14,7 @@ def extractor(pdf_path : str, doc_title: str) -> str :
         full_context = ""
 
         pages = pdf.pages
-        images = convert_from_path(pdf_path, dpi=200, poppler_path= r"C:\poppler-26.02.0\Library\bin")
+        images = convert_from_path(pdf_path, dpi=200, poppler_path= r"<poppler-path>") ## ADD poppler_path ONLY FOR WINDOWS
 
         print("--- doc converted ---")
 
