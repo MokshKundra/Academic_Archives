@@ -15,7 +15,49 @@ Upload lecture slides, past year papers, notes, and textbooks — then chat with
 ### Prerequisites
 - Python 3.11+
 - [Ollama](https://ollama.com) installed and running
-- [Poppler](https://github.com/oschwartz10612/poppler-windows/releases) (Windows)
+- Poppler (required by `pdf2image` to convert PDF pages to images)
+
+### Installing Poppler
+
+**Windows:**
+
+1. Download the latest release from [oschwartz10612/poppler-windows](https://github.com/oschwartz10612/poppler-windows/releases) (grab the `Release-XX.XX.X-X.zip`)
+2. Extract it somewhere permanent, e.g. `C:\poppler-26.02.0`
+3. Note the full path to the `Library\bin` folder inside it, e.g. `C:\poppler-26.02.0\Library\bin` — you'll need this path for the `poppler_path` argument in `pdf_upload.py`
+4. Update the `poppler_path` in `pdf_upload.py` to match your install location:
+
+```python
+images = convert_from_path(
+    pdf_path,
+    dpi=200,
+    poppler_path=r"C:\poppler-26.02.0\Library\bin"  # ← update this
+)
+```
+
+Alternatively, add the `Library\bin` folder to your Windows PATH environment variable, and you can drop the `poppler_path` argument entirely.
+
+**macOS:**
+
+```bash
+brew install poppler
+```
+
+No `poppler_path` needed — it installs to a location already on your PATH.
+
+**Linux (Debian/Ubuntu):**
+
+```bash
+sudo apt install poppler-utils
+```
+
+No `poppler_path` needed.
+
+**Verify it's working:**
+
+```bash
+pdftoppm -v
+# should print a version number, not "command not found"
+```
 
 ### Install
 

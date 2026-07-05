@@ -9,7 +9,7 @@ client = chromadb.PersistentClient(path= "./chroma_db")
 ef = get_embedding_function()
    
 
-def retrieve_from_db(question : str, course_id : str, doc_type: str = None) : 
+def retrieve_from_db(question : str, course_id : str, doc_type: str = None, n : int = 10) : 
     collection = client.get_collection(
         name= course_id,
         embedding_function= ef
@@ -21,7 +21,7 @@ def retrieve_from_db(question : str, course_id : str, doc_type: str = None) :
 
     results = collection.query(
         query_texts=[question],
-        n_results= 10,
+        n_results= n,
         where = where,
         include=["documents", "metadatas", "distances"]
     )
@@ -79,10 +79,10 @@ def augmente_and_generate(question : str, course_id : str, chat_id : str, rag_en
     if rag_enable:
         if doc_type:
             chunks = {
-                "pyq_chunks": retrieve_from_db(question, course_id, doc_type=doc_type) if doc_type == "pyqs" else [],
-                "slide_chunks": retrieve_from_db(question, course_id, doc_type=doc_type) if doc_type == "slides" else [],
-                "notes_chunks": retrieve_from_db(question, course_id, doc_type=doc_type) if doc_type == "notes" else [],
-                "tb_chunks": retrieve_from_db(question, course_id, doc_type=doc_type) if doc_type == "textbook" else []
+                "pyq_chunks": retrieve_from_db(question, course_id, doc_type=doc_type, n= 40) if doc_type == "pyqs" else [],
+                "slide_chunks": retrieve_from_db(question, course_id, doc_type=doc_type, n=40) if doc_type == "slides" else [],
+                "notes_chunks": retrieve_from_db(question, course_id, doc_type=doc_type, n= 40) if doc_type == "notes" else [],
+                "tb_chunks": retrieve_from_db(question, course_id, doc_type=doc_type, n= 40) if doc_type == "textbook" else []
             }
         else:
             chunks = retrieve_cross_reference(question, course_id)

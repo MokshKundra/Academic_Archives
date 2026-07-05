@@ -30,7 +30,7 @@ async def addToDatabase(file : UploadFile = File(...), course_id : str = Form(..
         tmp.write(contents)
         tmp_path = tmp.name    
     try:
-        extracted_contents = extractor(tmp_path)
+        extracted_contents = extractor(tmp_path, doc_title)
         doc = Document(
             course_id=course_id,
             doc_title=doc_title,
@@ -87,6 +87,7 @@ def send_message(chat_id: str, req: ChatMessageRequest):
 
     response, chunks = augmente_and_generate(
         question=req.question,
+        doc_type= req.doc_type,
         course_id=meta["course_id"],
         chat_hist=chat_hist,
         chat_id= chat_id,

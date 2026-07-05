@@ -9,7 +9,7 @@ def image_to_b64(pg_img) -> str:
     pg_img.save(buf, format="JPEG")
     return base64.b64encode(buf.getvalue()).decode("utf-8")
 
-def extractor(pdf_path : str) -> str :
+def extractor(pdf_path : str, doc_title: str) -> str :
     with pdfplumber.open(pdf_path) as pdf:
         full_context = ""
 
@@ -26,7 +26,7 @@ def extractor(pdf_path : str) -> str :
             img_b64 = image_to_b64(image)
 
             response = ext_page(imgb64= img_b64, extracted_text= extracted_text)
-            full_context += f"\n\n--- Page {i+1} ---\n"
+            full_context += f"\n\n--- Page {i+1} --- (Doc Title:{doc_title} --- \n"
             full_context += response['message']['content']
 
         return full_context

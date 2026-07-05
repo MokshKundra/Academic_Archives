@@ -23,6 +23,7 @@ class NewChatRequest(BaseModel):
         
 class ChatMessageRequest(BaseModel):
     question: str
+    doc_type: str
 
     @field_validator("question")
     @classmethod

@@ -54,9 +54,9 @@ def ext_page(imgb64 : str, extracted_text : str | None) -> str:
      elif settings.ext_provider == "groq" :
          res = _ext_groq(imgb64, prompt)
      elif settings.ext_provider == "huggingface":
-         res = _ext_huggingface()
+         res = _ext_huggingface(imgb64, prompt)
      elif settings.ext_provider == "zai":
-         res = _ext_zai()
+         res = _ext_zai(imgb64, prompt)
      else:
          res = ""
 
