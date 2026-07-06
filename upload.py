@@ -26,20 +26,22 @@ def addToCousreCollection(doc : Document):
     text_splitter = RecursiveCharacterTextSplitter()   
     
     
+    all_ids, all_chunks, all_metadatas = [], [], []
+
     for page_num, page_text in pages:
         chunks = text_splitter.split_text(page_text)
-
-        collection.add(
-            ids= [f"{doc.doc_title}_p{page_num}_chunk{i}" for i in range(len(chunks))],
-            documents= chunks,
-            metadatas=[{
+        for i, chunk in enumerate(chunks):
+            all_ids.append(f"{doc.doc_title}_p{page_num}_chunk{i}")
+            all_chunks.append(chunk)
+            all_metadatas.append({
                 "course_id": doc.course_id,
                 "doc_title": doc.doc_title,
                 "doc_type": doc.doc_type,
                 "page_number": page_num,
                 "chunk_idx": i
-            } for  i in range(len(chunks))]
-        )
+            })
+
+    collection.add(ids=all_ids, documents=all_chunks, metadatas=all_metadatas)
 
 
     

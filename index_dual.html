@@ -503,6 +503,18 @@
 
                 <div class="border-t p-4 flex-shrink-0" style="border-color: var(--border-main);">
                     <form id="query-form" class="flex space-x-3 items-center">
+                        <!-- Document Type Filter Dropdown -->
+                        <select id="doc_type_filter" disabled
+                            class="px-3 py-3 border rounded-xl outline-none transition-all disabled:opacity-50 text-sm"
+                            style="background-color: var(--bg-input); border-color: var(--border-main); color: var(--text-main);"
+                            title="Filter sources by document type">
+                            <option value="">All</option>
+                            <option value="slides">Slides</option>
+                            <option value="pyqs">PYQs</option>
+                            <option value="notes">Notes</option>
+                            <option value="textbook">Textbook</option>
+                        </select>
+
                         <input type="text" id="question_input" required disabled
                             class="flex-1 px-4 py-3 border rounded-xl outline-none transition-all disabled:opacity-50"
                             style="background-color: var(--bg-input); border-color: var(--border-main); color: var(--text-main);"
@@ -708,6 +720,7 @@
             currentChatId = chatId;
             document.getElementById('question_input').disabled = false;
             document.getElementById('ask-btn').disabled = false;
+            document.getElementById('doc_type_filter').disabled = false;
             document.getElementById('question_input').placeholder = "Type your question here...";
 
             try {
@@ -749,6 +762,7 @@
                     document.getElementById('active-course-id').textContent = "";
                     document.getElementById('question_input').disabled = true;
                     document.getElementById('ask-btn').disabled = true;
+                    document.getElementById('doc_type_filter').disabled = true;
                 }
                 loadChats();
             } catch (err) {
@@ -790,12 +804,14 @@
         document.getElementById('query-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const question = document.getElementById('question_input').value;
+            const docType = document.getElementById('doc_type_filter').value;
             const btn = document.getElementById('ask-btn');
 
             appendMessage('user', question);
             document.getElementById('question_input').value = '';
             btn.disabled = true;
             document.getElementById('question_input').disabled = true;
+            document.getElementById('doc_type_filter').disabled = true;
 
             const typingIndicator = appendTypingIndicator();
 
@@ -803,7 +819,10 @@
                 const res = await fetch(`/chats/${currentChatId}/message`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question: question })
+                    body: JSON.stringify({
+                        question: question,
+                        doc_type: docType || null
+                    })
                 });
                 const data = await res.json();
                 typingIndicator.remove();
@@ -817,6 +836,7 @@
             } finally {
                 btn.disabled = false;
                 document.getElementById('question_input').disabled = false;
+                document.getElementById('doc_type_filter').disabled = false;
                 document.getElementById('question_input').focus();
             }
         });
