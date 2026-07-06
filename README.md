@@ -23,18 +23,8 @@ Upload lecture slides, past year papers, notes, and textbooks — then chat with
 
 1. Download the latest release from [oschwartz10612/poppler-windows](https://github.com/oschwartz10612/poppler-windows/releases) (grab the `Release-XX.XX.X-X.zip`)
 2. Extract it somewhere permanent, e.g. `C:\poppler-26.02.0`
-3. Note the full path to the `Library\bin` folder inside it, e.g. `C:\poppler-26.02.0\Library\bin` — you'll need this path for the `poppler_path` argument in `pdf_upload.py`
-4. Update the `poppler_path` in `pdf_upload.py` to match your install location:
-
-```python
-images = convert_from_path(
-    pdf_path,
-    dpi=200,
-    poppler_path=r"C:\poppler-26.02.0\Library\bin"  # ← update this
-)
-```
-
-Alternatively, add the `Library\bin` folder to your Windows PATH environment variable, and you can drop the `poppler_path` argument entirely.
+3. Note the full path to the `Library\bin` folder inside it, e.g. `C:\poppler-26.02.0\Library\bin`
+4. Update the `POPPLER_PATH` in `.env` to match your install location
 
 **macOS:**
 
