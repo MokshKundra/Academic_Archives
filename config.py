@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     hf_api_key: Optional[str] = None
     zai_api_key: Optional[str] = None
 
+    poppler_path: Optional[str] = None
+
     model_config = {"env_file": ".env"}
 
 

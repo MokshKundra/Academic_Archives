@@ -1,5 +1,6 @@
 import pdfplumber
 import base64
+from config import settings
 from pdf2image import convert_from_path
 from providers.ext import ext_page
 
@@ -22,7 +23,8 @@ def extractor(pdf_path : str, doc_title: str) -> str :
         full_context = ""
 
         pages = pdf.pages
-        images = convert_from_path(pdf_path, dpi=200, poppler_path= r"C:\poppler-26.02.0\Library\bin")
+        poppler_path = settings.poppler_path
+        images = convert_from_path(pdf_path, dpi=200, poppler_path=poppler_path) if poppler_path else convert_from_path(pdf_path, dpi=200)
 
         print("--- doc converted ---")
 

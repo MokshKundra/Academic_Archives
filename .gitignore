@@ -1,6 +1,7 @@
 # environment and secrets
 .env
 *.env
+.gitignore
 
 # python
 __pycache__/
