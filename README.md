@@ -13,7 +13,7 @@ Upload lecture slides, past year papers, notes, and textbooks — then chat with
 ## Setup
 
 ### Prerequisites
-- Python 3.11+
+- Python 3.12 recommended (3.11+ generally works, but avoid 3.15 — a few packages in `requirements.txt` don't support it yet)
 - [Ollama](https://ollama.com) installed and running
 - Poppler (required by `pdf2image` to convert PDF pages to images)
 
@@ -66,16 +66,27 @@ git clone https://github.com/MokshKundra/Academic_Archives
 cd Academic_Archives
 
 python -m venv venv
-venv\Scripts\activate      # Windows
+
+# Activate the virtual environment
+venv\Scripts\activate        # Windows
+source venv/bin/activate     # macOS/Linux
+
 pip install -r requirements.txt
 ```
+
+> **Imports not resolving in your editor?** After activating the venv and installing requirements, your IDE may still be pointing at the system Python. In VS Code: `Cmd+Shift+P` → "Python: Select Interpreter" → pick the one at `./venv/bin/python`. Reload the window/terminal if the red squiggles don't clear right away.
 
 ### Configure
 
 ```bash
 cp .env.example .env
-# edit .env with your provider choices and API keys if using external providers
 ```
+
+Edit `.env` and set:
+- Which provider each pipeline (extraction, embedding, generation) should use — `ollama`, `openai`, `gemini`, `groq`, or `huggingface` — see `config.py` for the exact setting names.
+- An API key for any external provider you select, e.g. `OPENAI_API_KEY=sk-...`, `GEMINI_API_KEY=...`, `GROQ_API_KEY=...`, `HUGGINGFACE_API_KEY=...`.
+
+If you keep everything on the Ollama presets (`doc-extractor`, `nomic-embed-text`, `qwen3:8b`), no API keys are needed at all — only add keys for the providers you actually switch on.
 
 ### Pull Ollama models
 
