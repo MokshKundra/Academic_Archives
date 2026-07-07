@@ -10,6 +10,7 @@ from retrival import augmente_and_generate
 from query_schema import NewChatRequest, ChatMessageRequest
 from chat_store import get_chat_meta, get_messages, append_message, list_chats, delete_chat, save_message_sources, toggle_rag
 from chat_store import create_chat as store_create_chat
+from chunking import chunk_content
 
 app = FastAPI()
 
@@ -133,3 +134,62 @@ def delete_chat_endpoint(chat_id: str):
 def toggle_rag_endpoint(chat_id: str):
     new_state = toggle_rag(chat_id)
     return {"chat_id": chat_id, "rag_enabled": new_state}
+
+
+@app.post("/chats/{chat_id}/upload")
+async def upload_in_chat( chat_id : str, file : UploadFile = File(...), doc_title : str = Form(...), doc_type : Literal["slides", "pyqs", "notes", "textbook"] = Form(...)) : 
+    meta = get_chat_meta(chat_id)
+
+    if not file.filename.endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Only PDF files are supported")
+    
+    with tempfile.NamedTemporaryFile(delete= False, suffix=".pdf") as tmp:
+        contents = await file.read()
+        tmp.write(contents)
+        tmp_path = tmp.name
+
+    try:
+        extracted_content = extractor(tmp_path, doc_title)
+
+        doc = Document(
+            course_id=meta["course_id"],
+            doc_title=doc_title,
+            doc_type=doc_type,
+            content=extracted_content
+        )
+
+        addToCousreCollection(doc)
+
+        chunk_data = chunk_content(doc)
+        formatted_chunks = [
+            {
+                "text": text,
+                "source": doc.doc_title,
+                "page": meta["page_number"],
+                "doc_type": doc.doc_type,
+                "score": 1.0   
+            }
+            for text, meta in zip(chunk_data['chunks'], chunk_data['metas'])
+        ]
+
+        _, msg_idx = append_message(
+            chat_id,
+            role="system",
+            content=f"Uploaded **{doc.doc_title}** ({doc.doc_type}) — {len(formatted_chunks)} chunks uploaded to this chat."
+        )
+
+        save_message_sources(chat_id, msg_idx, formatted_chunks)
+
+        return {
+            "status": "success",
+            "doc_title": doc.doc_title,
+            "doc_type": doc.doc_type,
+            "chunks_pinned": len(formatted_chunks)
+        }
+
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"UPLOAD FAILED :: {str(e)}")
+    finally:
+        os.unlink(tmp_path)
