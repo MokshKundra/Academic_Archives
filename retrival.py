@@ -155,3 +155,60 @@ def augmente_and_generate(question : str, course_id : str, chat_id : str, rag_en
     response = generate(messages=messages)
 
     return response, chunks
+
+
+# DETAIL RETREIVAL
+
+def list_courses() -> list[str]:
+    collections = client.list_collections()
+    return [c.name for c in collections]
+
+def list_docs_in_collection(course_id : str) -> list[str]:
+    try:
+        collection = client.get_collection(name=course_id, embedding_function= ef)
+    except:
+        raise ValueError(f"Course '{course_id} not found")
+    
+    results = collection.get(include=["metadatas"])
+
+    seen = {}
+    for meta in results["metadatas"]:
+        title = meta["doc_title"]
+        if title not in seen:
+            seen[title] = {
+                "doc_title": title,
+                "doc_type": meta["doc_type"],
+                "page_count": 0,
+                "chunk_count": 0 
+            }
+        seen[title]["chunk_count"] += 1
+    
+    page_tracker = {}
+    for meta in results["metadatas"]:
+        title = meta["doc_title"]
+        page_tracker[title] = max(page_tracker.get(title, 0), meta["page_number"])
+
+    for title, count in page_tracker.items():
+        seen[title]["page_count"] = count
+
+    return list(seen.values())
+
+def delete_doc_from_collection(course_id: str, doc_title: str):
+    try:
+        collection = client.get_collection(name=course_id, embedding_function=ef)
+    except Exception:
+        raise ValueError(f"Course '{course_id}' not found")
+    
+    collection.delete(
+        where={"doc_title": doc_title}
+    )
+    
+    return {"status": "deleted", "course_id": course_id, "doc_title": doc_title}
+
+def delete_collection(course_id: str):
+    try:
+        client.delete_collection(name=course_id)
+    except Exception:
+        raise ValueError(f"Course '{course_id}' not found or could not be deleted")
+    
+    return {"status": "collection_deleted", "course_id": course_id}

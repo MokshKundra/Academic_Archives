@@ -11,6 +11,7 @@ from query_schema import NewChatRequest, ChatMessageRequest
 from chat_store import get_chat_meta, get_messages, append_message, list_chats, delete_chat, save_message_sources, toggle_rag
 from chat_store import create_chat as store_create_chat
 from chunking import chunk_content
+from retrival import list_courses, list_docs_in_collection, delete_doc_from_collection, delete_collection
 
 app = FastAPI()
 
@@ -49,7 +50,7 @@ async def addToDatabase(file : UploadFile = File(...), course_id : str = Form(..
             "pages_extracted": extracted_contents.count("--- Page")
         }
     except ValueError as e:
-        raise HTTPException(status_code=422, detail= e)
+        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"EXTRACTION FAILED :: {str(e)}")
     finally:
@@ -193,3 +194,35 @@ async def upload_in_chat( chat_id : str, file : UploadFile = File(...), doc_titl
         raise HTTPException(status_code=500, detail=f"UPLOAD FAILED :: {str(e)}")
     finally:
         os.unlink(tmp_path)
+
+
+
+@app.get("/courses")
+def get_courses():
+    return {"courses": list_courses()}
+
+@app.get("/courses/{course_id}/documents")
+def get_documents(course_id: str):
+    try:
+        documents = list_docs_in_collection(course_id.upper())
+        return {"course_id": course_id.upper(), "documents": documents}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
+
+@app.delete("/courses/{course_id}/docs/{doc_title}")
+def delete_document(course_id: str, doc_title: str):
+    try:
+        result = delete_doc_from_collection(course_id.upper(), doc_title)
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
+
+@app.delete("/courses/{course_id}")
+def delete_course(course_id: str):
+    try:
+        result = delete_collection(course_id.upper())
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
