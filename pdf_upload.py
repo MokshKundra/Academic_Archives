@@ -21,22 +21,36 @@ def image_to_b64(pg_img) -> str:
 def extractor(pdf_path : str, doc_title: str) -> str :
     with pdfplumber.open(pdf_path) as pdf:
         full_context = ""
-
-        pages = pdf.pages
         poppler_path = settings.poppler_path
-        images = convert_from_path(pdf_path, dpi=200, poppler_path=poppler_path) if poppler_path else convert_from_path(pdf_path, dpi=200)
 
-        print("--- doc converted ---")
+        print("--- doc processing started ---")
 
-        for i, (page, image) in enumerate(zip(pages, images)):
-
-            print(f"--- on page {i} ---")
+        for i, page in enumerate(pdf.pages):
+            print(f"--- on page {i + 1} ---")
 
             extracted_text = page.extract_text()
             
             if needs_vision(page, extracted_text):
+                if poppler_path:
+                    images = convert_from_path(
+                        pdf_path, 
+                        dpi=200, 
+                        poppler_path=poppler_path, 
+                        first_page=i+1, 
+                        last_page=i+1
+                    )
+                else:
+                    images = convert_from_path(
+                        pdf_path, 
+                        dpi=200, 
+                        first_page=i+1, 
+                        last_page=i+1
+                    )
+                
+                image = images[0]
                 img_b64 = image_to_b64(image)
-                response = ext_page(imgb64= img_b64, extracted_text= extracted_text)
+                
+                response = ext_page(imgb64=img_b64, extracted_text=extracted_text)
                 page_content = response['message']['content']
             else:
                 page_content = f"### EXTRACTED_TEXT\n{extracted_text}\n\n### VISUAL_ELEMENTS\nNONE"
@@ -45,4 +59,3 @@ def extractor(pdf_path : str, doc_title: str) -> str :
             full_context += page_content
 
         return full_context
-
