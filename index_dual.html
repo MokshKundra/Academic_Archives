@@ -12,7 +12,6 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@400;500;600&display=swap"
         rel="stylesheet">
 
-    <!-- Apply theme before page loads to prevent flashing -->
     <script>
         if (localStorage.getItem('theme') === 'light') {
             document.documentElement.classList.add('light');
@@ -20,7 +19,6 @@
     </script>
 
     <style>
-        /* CSS Variables for Theming */
         :root {
             --bg-body: #0f141d;
             --bg-card: #252b33;
@@ -30,15 +28,12 @@
             --border-hover: #627188;
             --scrollbar: #475061;
             --scrollbar-hover: #627188;
-
             --text-main: #d2d3e1;
             --text-heading: #e8e9f0;
             --text-muted: #98a1b4;
             --text-dim: #7d899e;
-
             --accent: #627188;
             --accent-hover: #7d899e;
-
             --code-bg: #1e232b;
             --code-border: #2c333d;
             --rag-on-bg: rgba(74, 222, 128, 0.2);
@@ -46,6 +41,11 @@
             --rag-on-border: #16a34a;
             --rag-off-bg: #1e232b;
             --rag-off-text: #7d899e;
+            --danger: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.15);
+            --danger-hover-bg: rgba(239, 68, 68, 0.25);
+            --warn: #f59e0b;
+            --warn-bg: rgba(245, 158, 11, 0.1);
         }
 
         .light {
@@ -57,15 +57,12 @@
             --border-hover: #b5a3c5;
             --scrollbar: #b5a3c5;
             --scrollbar-hover: #b5a3c5;
-
             --text-main: #2f2438;
             --text-heading: #241b2b;
             --text-muted: #4b3d59;
             --text-dim: #5a4968;
-
             --accent: #b5a3c5;
             --accent-hover: #5a4968;
-
             --code-bg: #e1d9e8;
             --code-border: #c3b5d1;
             --rag-on-bg: rgba(34, 197, 94, 0.2);
@@ -73,6 +70,11 @@
             --rag-on-border: #22c55e;
             --rag-off-bg: #e1d9e8;
             --rag-off-text: #5a4968;
+            --danger: #dc2626;
+            --danger-bg: rgba(220, 38, 38, 0.1);
+            --danger-hover-bg: rgba(220, 38, 38, 0.2);
+            --warn: #d97706;
+            --warn-bg: rgba(217, 119, 6, 0.1);
         }
 
         body {
@@ -86,7 +88,6 @@
             font-family: 'Lora', serif;
         }
 
-        /* Animations */
         .fade-in-up {
             animation: fadeInUp 0.4s ease-out forwards;
         }
@@ -119,7 +120,38 @@
             }
         }
 
-        /* Scrollbar */
+        .toast-enter {
+            animation: toastIn 0.3s ease-out forwards;
+        }
+
+        .toast-exit {
+            animation: toastOut 0.3s ease-in forwards;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(-12px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(-12px) scale(0.95);
+            }
+        }
+
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -137,7 +169,6 @@
             background: var(--scrollbar-hover);
         }
 
-        /* Typing Indicator */
         .typing-dot {
             animation: typing 1.4s infinite ease-in-out;
         }
@@ -165,7 +196,6 @@
             }
         }
 
-        /* Markdown Styles */
         .markdown-body {
             font-size: 15px;
             line-height: 1.75;
@@ -311,20 +341,121 @@
             font-weight: 600;
             color: var(--text-heading);
         }
+
+        .delete-btn {
+            opacity: 0;
+            transition: all 0.15s ease;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .delete-btn.visible {
+            opacity: 1;
+        }
+
+        .delete-btn:hover {
+            background-color: var(--danger-hover-bg) !important;
+            color: var(--danger) !important;
+        }
+
+        .deletable-row:hover .delete-btn {
+            opacity: 0.6;
+        }
+
+        .deletable-row:hover .delete-btn:hover {
+            opacity: 1;
+        }
+
+        .sources-toggle {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.15s ease;
+            border: 1px solid var(--border-main);
+            background-color: var(--bg-card);
+            color: var(--text-dim);
+            user-select: none;
+        }
+
+        .sources-toggle:hover {
+            background-color: var(--bg-hover);
+            color: var(--text-muted);
+        }
+
+        .sources-toggle .chevron {
+            transition: transform 0.2s ease;
+            display: inline-flex;
+        }
+
+        .sources-toggle.open .chevron {
+            transform: rotate(180deg);
+        }
+
+        .sources-toggle .count-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            padding: 0 5px;
+            font-size: 10px;
+            font-weight: 600;
+            background-color: var(--accent);
+            color: var(--text-heading);
+            margin-left: 6px;
+        }
+
+        .sources-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.25s ease, margin 0.3s ease;
+            opacity: 0;
+            margin-top: 0;
+        }
+
+        .sources-body.open {
+            max-height: 500px;
+            opacity: 1;
+            margin-top: 10px;
+        }
+
+        .field-hint {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            margin-top: 6px;
+            font-size: 11px;
+            line-height: 1.4;
+            color: var(--text-dim);
+        }
+
+        .field-hint.warn {
+            color: var(--warn);
+        }
+
+        .field-hint svg {
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
     </style>
 </head>
 
 <body class="min-h-screen flex flex-col">
 
-    <!-- Navigation -->
+    <div id="toast-container" class="fixed top-20 right-6 z-[60] flex flex-col items-end space-y-2 pointer-events-none">
+    </div>
+
     <nav class="backdrop-blur-md border-b sticky top-0 z-40"
         style="background-color: var(--bg-card); border-color: var(--border-main);">
         <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-2 cursor-pointer group" onclick="showView('landing')">
                 <div class="w-7 h-7 rounded-md flex items-center justify-center font-bold text-sm transition-colors"
-                    style="background-color: var(--accent); color: var(--bg-card);">
-                    A
-                </div>
+                    style="background-color: var(--accent); color: var(--bg-card);">A</div>
                 <span class="font-serif text-xl font-medium tracking-tight" style="color: var(--text-heading);">Academic
                     Archives</span>
             </div>
@@ -332,17 +463,13 @@
                 <button onclick="showView('upload')" class="px-4 py-2 text-sm font-medium rounded-lg transition-all"
                     style="color: var(--text-muted);"
                     onmouseover="this.style.backgroundColor='var(--bg-hover)'; this.style.color='var(--text-heading)';"
-                    onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--text-muted)';">
-                    Add Data
-                </button>
+                    onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--text-muted)';">Your
+                    Data</button>
                 <button onclick="showView('query')" class="px-4 py-2 text-sm font-medium rounded-lg transition-all"
                     style="color: var(--text-muted);"
                     onmouseover="this.style.backgroundColor='var(--bg-hover)'; this.style.color='var(--text-heading)';"
-                    onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--text-muted)';">
-                    Ask Questions
-                </button>
-
-                <!-- Theme Toggle Button -->
+                    onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--text-muted)';">Ask
+                    Questions</button>
                 <button id="theme-toggle" onclick="toggleTheme()" class="p-2 rounded-lg transition-all"
                     style="color: var(--text-muted);" onmouseover="this.style.backgroundColor='var(--bg-hover)';"
                     onmouseout="this.style.backgroundColor='transparent';">
@@ -366,12 +493,10 @@
         <div id="landing-view" class="fade-in-up flex flex-col items-center text-center py-16">
             <h1 class="font-serif text-4xl md:text-5xl tracking-tight mb-5 max-w-2xl"
                 style="color: var(--text-heading);">
-                Query your academic universe with precision.
-            </h1>
+                Query your academic universe with precision.</h1>
             <p class="max-w-xl text-lg mb-12 leading-relaxed" style="color: var(--text-muted);">
                 Upload course materials and ask questions to get instant, sourced answers powered by Retrieval-Augmented
-                Generation.
-            </p>
+                Generation.</p>
             <div class="grid md:grid-cols-2 gap-6 w-full max-w-3xl">
                 <div class="p-8 rounded-2xl border hover:bg-opacity-50 transition-all cursor-pointer text-left group"
                     style="background-color: var(--bg-card); border-color: var(--border-main);"
@@ -385,10 +510,11 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                         </svg>
-                        <h3 class="ml-3 font-serif text-xl" style="color: var(--text-heading);">Add Data</h3>
+                        <h3 class="ml-3 font-serif text-xl" style="color: var(--text-heading);">Your Data</h3>
                     </div>
-                    <p class="text-sm leading-relaxed" style="color: var(--text-muted);">Upload PDFs of slides, notes,
-                        previous year questions, or textbooks to expand your knowledge base.</p>
+                    <p class="text-sm leading-relaxed" style="color: var(--text-muted);">Browse your uploaded courses
+                        and documents. Upload PDFs of slides, notes, previous year questions, or textbooks to expand
+                        your knowledge base.</p>
                 </div>
                 <div class="p-8 rounded-2xl border hover:bg-opacity-50 transition-all cursor-pointer text-left group"
                     style="background-color: var(--bg-card); border-color: var(--border-main);"
@@ -410,59 +536,111 @@
             </div>
         </div>
 
-        <!-- UPLOAD VIEW -->
-        <div id="upload-view" class="hidden max-w-2xl mx-auto">
-            <div class="rounded-2xl border p-8 md:p-10 shadow-sm"
-                style="background-color: var(--bg-card); border-color: var(--border-main);">
-                <h2 class="font-serif text-2xl mb-8" style="color: var(--text-heading);">Upload Document</h2>
-                <form id="upload-form" class="space-y-6">
-                    <div>
-                        <label class="block text-xs font-medium uppercase tracking-wide mb-2"
-                            style="color: var(--text-muted);">Course ID</label>
-                        <input type="text" id="course_id_upload" required
-                            class="w-full px-4 py-3 border rounded-lg outline-none transition-all"
-                            style="background-color: var(--bg-input); border-color: var(--border-main); color: var(--text-main);"
-                            placeholder="e.g., CS101">
+        <!-- YOUR DATA VIEW -->
+        <div id="upload-view" class="hidden max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-1 rounded-2xl border p-4 flex flex-col"
+                style="background-color: var(--bg-card); border-color: var(--border-main); height: 75vh; min-height: 500px;">
+                <button id="upload-new-btn"
+                    class="w-full font-medium py-2.5 rounded-lg transition-all mb-4 flex items-center justify-center space-x-2"
+                    style="background-color: var(--accent); color: var(--text-heading);">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Upload Document</span>
+                </button>
+                <h3 class="text-xs font-medium uppercase tracking-wide mb-2 px-1" style="color: var(--text-muted);">
+                    Courses</h3>
+                <div id="course-list" class="flex-grow overflow-y-auto space-y-2 pr-1"></div>
+            </div>
+
+            <div class="md:col-span-2 rounded-2xl border shadow-sm flex flex-col overflow-hidden"
+                style="background-color: var(--bg-card); border-color: var(--border-main); height: 75vh; min-height: 500px;">
+                <div id="upload-form-section" class="hidden p-8 md:p-10 overflow-y-auto">
+                    <div class="flex items-center justify-between mb-8">
+                        <h2 class="font-serif text-2xl" style="color: var(--text-heading);">Upload Document</h2>
+                        <button onclick="showDocumentsView()"
+                            class="text-xs px-3 py-1.5 rounded-full border flex items-center space-x-1.5 transition-all"
+                            style="border-color: var(--border-main); background-color: var(--bg-input); color: var(--text-muted);"
+                            onmouseover="this.style.backgroundColor='var(--bg-hover)';"
+                            onmouseout="this.style.backgroundColor='var(--bg-input)';">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            <span>Back</span>
+                        </button>
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium uppercase tracking-wide mb-2"
-                            style="color: var(--text-muted);">Document Title</label>
-                        <input type="text" id="doc_title" required
-                            class="w-full px-4 py-3 border rounded-lg outline-none transition-all"
-                            style="background-color: var(--bg-input); border-color: var(--border-main); color: var(--text-main);"
-                            placeholder="e.g., Intro to Algorithms">
+                    <form id="upload-form" class="space-y-6">
+                        <div>
+                            <label class="block text-xs font-medium uppercase tracking-wide mb-2"
+                                style="color: var(--text-muted);">Course ID</label>
+                            <input type="text" id="course_id_upload" required minlength="3" maxlength="512"
+                                pattern="[a-zA-Z0-9._\- ]+"
+                                class="w-full px-4 py-3 border rounded-lg outline-none transition-all"
+                                style="background-color: var(--bg-input); border-color: var(--border-main); color: var(--text-main);"
+                                placeholder="e.g., CS101">
+                            <div class="field-hint warn">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>Minimum 3 characters. Only letters, numbers, dots, hyphens, and underscores are
+                                    allowed.</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium uppercase tracking-wide mb-2"
+                                style="color: var(--text-muted);">Document Title</label>
+                            <input type="text" id="doc_title" required
+                                class="w-full px-4 py-3 border rounded-lg outline-none transition-all"
+                                style="background-color: var(--bg-input); border-color: var(--border-main); color: var(--text-main);"
+                                placeholder="e.g., Intro to Algorithms">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium uppercase tracking-wide mb-2"
+                                style="color: var(--text-muted);">Document Type</label>
+                            <select id="doc_type_upload" required
+                                class="w-full px-4 py-3 border rounded-lg outline-none transition-all"
+                                style="background-color: var(--bg-input); border-color: var(--border-main); color: var(--text-main);">
+                                <option value="slides">Slides</option>
+                                <option value="pyqs">Previous Year Questions (PYQs)</option>
+                                <option value="notes">Notes</option>
+                                <option value="textbook">Textbook</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium uppercase tracking-wide mb-2"
+                                style="color: var(--text-muted);">PDF File</label>
+                            <input type="file" id="file_input" accept=".pdf" required
+                                class="w-full text-sm cursor-pointer transition-all" style="color: var(--text-muted);">
+                        </div>
+                        <button type="submit" id="upload-btn"
+                            class="w-full font-medium py-3 rounded-lg transition-all flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                            style="background-color: var(--accent); color: var(--text-heading);">
+                            <span id="upload-text">Upload & Process</span>
+                        </button>
+                    </form>
+                    <div id="upload-status" class="mt-6"></div>
+                </div>
+
+                <div id="documents-section" class="flex-grow overflow-y-auto p-6">
+                    <div class="flex flex-col items-center justify-center text-center" style="min-height: 300px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-4" style="color: var(--text-dim);"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <p class="text-sm" style="color: var(--text-dim);">Select a course to view its documents, or
+                            click "Upload Document" to add new materials.</p>
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium uppercase tracking-wide mb-2"
-                            style="color: var(--text-muted);">Document Type</label>
-                        <select id="doc_type_upload" required
-                            class="w-full px-4 py-3 border rounded-lg outline-none transition-all"
-                            style="background-color: var(--bg-input); border-color: var(--border-main); color: var(--text-main);">
-                            <option value="slides">Slides</option>
-                            <option value="pyqs">Previous Year Questions (PYQs)</option>
-                            <option value="notes">Notes</option>
-                            <option value="textbook">Textbook</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium uppercase tracking-wide mb-2"
-                            style="color: var(--text-muted);">PDF File</label>
-                        <input type="file" id="file_input" accept=".pdf" required
-                            class="w-full text-sm cursor-pointer transition-all" style="color: var(--text-muted);">
-                    </div>
-                    <button type="submit" id="upload-btn"
-                        class="w-full font-medium py-3 rounded-lg transition-all flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
-                        style="background-color: var(--accent); color: var(--text-heading);">
-                        <span id="upload-text">Upload & Process</span>
-                    </button>
-                </form>
-                <div id="upload-status" class="mt-6"></div>
+                </div>
             </div>
         </div>
 
         <!-- QUERY VIEW -->
         <div id="query-view" class="hidden max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Sidebar -->
             <div class="md:col-span-1 rounded-2xl border p-4 flex flex-col"
                 style="background-color: var(--bg-card); border-color: var(--border-main); height: 75vh; min-height: 500px;">
                 <button id="new-chat-btn"
@@ -477,11 +655,8 @@
                 <div id="chat-list" class="flex-grow overflow-y-auto space-y-2 pr-1"></div>
             </div>
 
-            <!-- Main Chat Area -->
             <div class="md:col-span-2 rounded-2xl border shadow-sm flex flex-col"
                 style="background-color: var(--bg-card); border-color: var(--border-main); height: 75vh; min-height: 500px;">
-
-                <!-- Chat Header -->
                 <div class="border-b p-4 flex-shrink-0 flex justify-between items-center" id="chat-header"
                     style="border-color: var(--border-main);">
                     <div class="flex flex-col overflow-hidden">
@@ -490,7 +665,6 @@
                         <span id="active-course-id" class="text-xs" style="color: var(--text-dim);"></span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <!-- NEW: Upload to Chat Button -->
                         <button id="chat-upload-btn" disabled
                             class="text-xs px-3 py-1.5 rounded-full border flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                             style="border-color: var(--border-main); background-color: var(--bg-input); color: var(--text-muted);"
@@ -519,7 +693,6 @@
 
                 <div class="border-t p-4 flex-shrink-0" style="border-color: var(--border-main);">
                     <form id="query-form" class="flex space-x-3 items-center">
-                        <!-- Document Type Filter Dropdown -->
                         <select id="doc_type_filter" disabled
                             class="px-3 py-3 border rounded-xl outline-none transition-all disabled:opacity-50 text-sm"
                             style="background-color: var(--bg-input); border-color: var(--border-main); color: var(--text-main);"
@@ -530,7 +703,6 @@
                             <option value="notes">Notes</option>
                             <option value="textbook">Textbook</option>
                         </select>
-
                         <input type="text" id="question_input" required disabled
                             class="flex-1 px-4 py-3 border rounded-xl outline-none transition-all disabled:opacity-50"
                             style="background-color: var(--bg-input); border-color: var(--border-main); color: var(--text-main);"
@@ -560,10 +732,19 @@
                 <div>
                     <label class="block text-xs font-medium uppercase tracking-wide mb-2"
                         style="color: var(--text-muted);">Course ID</label>
-                    <input type="text" id="new-course-id" required
-                        class="w-full px-4 py-2.5 border rounded-lg outline-none"
+                    <input type="text" id="new-course-id" required minlength="3" maxlength="512"
+                        pattern="[a-zA-Z0-9._\- ]+" class="w-full px-4 py-2.5 border rounded-lg outline-none"
                         style="background-color: var(--bg-input); border-color: var(--border-main); color: var(--text-main);"
                         placeholder="e.g., CS101">
+                    <div class="field-hint warn">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Minimum 3 characters. Only letters, numbers, dots, hyphens, and underscores are
+                            allowed.</span>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-xs font-medium uppercase tracking-wide mb-2"
@@ -588,7 +769,7 @@
         </div>
     </div>
 
-    <!-- NEW: Upload in Chat Modal -->
+    <!-- Upload in Chat Modal -->
     <div id="chat-upload-modal"
         class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="rounded-2xl border p-8 max-w-md w-full shadow-xl pop-in"
@@ -635,411 +816,584 @@
         </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal"
+        class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="rounded-2xl border p-8 max-w-sm w-full shadow-xl pop-in"
+            style="background-color: var(--bg-card); border-color: var(--border-main);">
+            <div class="flex items-center space-x-3 mb-4">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                    style="background-color: var(--danger-bg);">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" style="color: var(--danger);" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </div>
+                <h2 class="font-serif text-xl" style="color: var(--text-heading);">Confirm Delete</h2>
+            </div>
+            <p id="delete-modal-message" class="text-sm mb-6 leading-relaxed" style="color: var(--text-muted);">Are you
+                sure?</p>
+            <div class="flex space-x-3">
+                <button type="button" onclick="closeDeleteModal()"
+                    class="flex-1 py-2.5 rounded-lg transition-all text-sm font-medium"
+                    style="color: var(--text-muted); border: 1px solid var(--border-main);"
+                    onmouseover="this.style.backgroundColor='var(--bg-hover)';"
+                    onmouseout="this.style.backgroundColor='transparent';">Cancel</button>
+                <button type="button" id="delete-modal-confirm-btn"
+                    class="flex-1 py-2.5 rounded-lg transition-all text-sm font-medium"
+                    style="background-color: var(--danger); color: white;" onmouseover="this.style.opacity='0.85';"
+                    onmouseout="this.style.opacity='1';">Delete</button>
+            </div>
+        </div>
+    </div>
+
     <footer class="py-6 text-center text-xs border-t mt-auto"
         style="color: var(--text-dim); border-color: var(--border-main);">
         Academic Archives &middot; Powered by FastAPI & RAG
     </footer>
 
     <script>
-        // Configure marked
-        marked.setOptions({ breaks: true, gfm: true });
+        marked.use({ breaks: true, gfm: true });
 
-        // Global State
         let currentChatId = null;
+        let currentCourseId = null;
+        let deleteCallback = null;
 
-        // Theme Logic
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const colors = {
+                success: { bg: 'rgba(74, 222, 128, 0.15)', border: '#16a34a', text: '#4ade80', icon: 'check' },
+                error: { bg: 'var(--danger-bg)', border: 'var(--danger)', text: 'var(--danger)', icon: 'x' },
+                info: { bg: 'var(--bg-hover)', border: 'var(--border-hover)', text: 'var(--text-main)', icon: 'info' },
+            };
+            const c = colors[type] || colors.info;
+            const iconPaths = { check: 'M5 13l4 4L19 7', x: 'M6 18L18 6M6 6l12 12', info: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' };
+            toast.className = 'toast-enter pointer-events-auto';
+            toast.style.cssText = `background-color:${c.bg};border:1px solid ${c.border};border-radius:12px;padding:12px 16px;display:flex;align-items:center;max-width:360px;backdrop-filter:blur(12px);`;
+            toast.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0" style="color:${c.text};" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="${iconPaths[c.icon]}" /></svg><span style="color:${c.text};font-size:13px;margin-left:10px;line-height:1.4;">${escapeHtml(message)}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.classList.remove('toast-enter'); toast.classList.add('toast-exit'); toast.addEventListener('animationend', () => toast.remove()); }, 3000);
+        }
+
+        function showDeleteModal(message, callback) {
+            document.getElementById('delete-modal-message').textContent = message;
+            deleteCallback = callback;
+            document.getElementById('delete-modal').classList.remove('hidden');
+        }
+        function closeDeleteModal() { document.getElementById('delete-modal').classList.add('hidden'); deleteCallback = null; }
+        document.getElementById('delete-modal-confirm-btn').addEventListener('click', async () => {
+            if (deleteCallback) { const cb = deleteCallback; closeDeleteModal(); await cb(); }
+        });
+
+        ['delete-modal', 'new-chat-modal', 'chat-upload-modal'].forEach(id => {
+            document.getElementById(id).addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) {
+                    if (id === 'delete-modal') closeDeleteModal();
+                    else if (id === 'new-chat-modal') closeModal();
+                    else closeChatUploadModal();
+                }
+            });
+        });
+
         function toggleTheme() {
-            const html = document.documentElement;
-            const isLight = html.classList.toggle('light');
+            const isLight = document.documentElement.classList.toggle('light');
             localStorage.setItem('theme', isLight ? 'light' : 'dark');
             updateThemeIcon(isLight);
         }
-
         function updateThemeIcon(isLight) {
             document.getElementById('theme-icon-sun').classList.toggle('hidden', !isLight);
             document.getElementById('theme-icon-moon').classList.toggle('hidden', isLight);
         }
-
-        // Set initial icon state based on saved theme
         updateThemeIcon(localStorage.getItem('theme') === 'light');
 
-        // View Navigation
         function showView(view) {
-            document.querySelectorAll('[id$="view"]').forEach(el => {
-                el.classList.add('hidden');
-                el.classList.remove('fade-in-up');
-            });
+            document.querySelectorAll('[id$="view"]').forEach(el => { el.classList.add('hidden'); el.classList.remove('fade-in-up'); });
             const el = document.getElementById(view + '-view');
-            el.classList.remove('hidden');
-            void el.offsetWidth;
-            el.classList.add('fade-in-up');
+            el.classList.remove('hidden'); void el.offsetWidth; el.classList.add('fade-in-up');
+            if (view === 'query') loadChats();
+            if (view === 'upload') loadCourses();
+        }
 
-            if (view === 'query') {
-                loadChats();
+        function escapeHtml(text) { const d = document.createElement('div'); d.textContent = text; return d.innerHTML; }
+
+        function getDocTypeIcon(type) {
+            const c = `class="h-5 w-5" style="color:var(--text-dim);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"`;
+            const icons = {
+                slides: `<svg xmlns="http://www.w3.org/2000/svg" ${c}><path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>`,
+                pyqs: `<svg xmlns="http://www.w3.org/2000/svg" ${c}><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`,
+                notes: `<svg xmlns="http://www.w3.org/2000/svg" ${c}><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>`,
+                textbook: `<svg xmlns="http://www.w3.org/2000/svg" ${c}><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>`,
+            };
+            return icons[type] || `<svg xmlns="http://www.w3.org/2000/svg" ${c}><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>`;
+        }
+
+        function trashIcon(size = 'h-4 w-4') {
+            return `<svg xmlns="http://www.w3.org/2000/svg" class="${size}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>`;
+        }
+
+        document.getElementById('chat-box').addEventListener('click', (e) => {
+            const toggle = e.target.closest('.sources-toggle');
+            if (!toggle) return;
+            const body = toggle.nextElementSibling;
+            if (!body || !body.classList.contains('sources-body')) return;
+            const isOpen = body.classList.toggle('open');
+            toggle.classList.toggle('open', isOpen);
+        });
+
+        function showUploadForm(courseId = '') {
+            document.getElementById('upload-form-section').classList.remove('hidden');
+            document.getElementById('documents-section').classList.add('hidden');
+            document.getElementById('course_id_upload').value = courseId;
+            document.getElementById('upload-status').innerHTML = '';
+            if (courseId) setTimeout(() => document.getElementById('doc_title').focus(), 50);
+        }
+        function showDocumentsView() {
+            document.getElementById('upload-form-section').classList.add('hidden');
+            document.getElementById('documents-section').classList.remove('hidden');
+        }
+        document.getElementById('upload-new-btn').addEventListener('click', () => showUploadForm(''));
+
+        async function loadCourses() {
+            try {
+                const res = await fetch('/courses');
+                const data = await res.json();
+                const courses = data.courses || [];
+                const courseList = document.getElementById('course-list');
+                courseList.innerHTML = '';
+                if (courses.length === 0) {
+                    courseList.innerHTML = `<p class="text-center text-xs mt-4" style="color:var(--text-dim);">No courses yet.<br>Upload a document to get started.</p>`;
+                    return;
+                }
+                courses.forEach(course => {
+                    const courseId = typeof course === 'string' ? course : (course.course_id || course.id || course.name || 'Unknown');
+                    const docCount = (typeof course === 'object' && course.doc_count != null) ? course.doc_count : null;
+                    const courseEl = document.createElement('div');
+                    courseEl.className = 'p-3 rounded-lg cursor-pointer transition-all group relative';
+                    courseEl.style.backgroundColor = courseId === currentCourseId ? 'var(--bg-hover)' : 'transparent';
+                    courseEl.innerHTML = `
+                        <div class="flex items-center space-x-2 overflow-hidden">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0" style="color:var(--text-dim);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                            <div class="flex flex-col overflow-hidden flex-grow min-w-0">
+                                <span class="text-sm font-medium truncate" style="color:var(--text-main);">${escapeHtml(courseId)}</span>
+                                ${docCount != null ? `<span class="text-xs" style="color:var(--text-dim);">${docCount} doc${docCount !== 1 ? 's' : ''}</span>` : ''}
+                            </div>
+                            <button class="delete-btn p-1 rounded-md opacity-0 group-hover:opacity-60 hover:!opacity-100 hover:!bg-[var(--danger-hover-bg)] hover:!text-[var(--danger)]"
+                                    style="color:var(--text-dim);" title="Delete course" data-course-id="${escapeHtml(courseId)}">${trashIcon('h-3.5 w-3.5')}</button>
+                        </div>`;
+                    courseEl.addEventListener('click', (e) => { if (!e.target.closest('.delete-btn')) selectCourse(courseId); });
+                    courseEl.onmouseover = () => { if (courseId !== currentCourseId) courseEl.style.backgroundColor = 'var(--bg-hover)'; };
+                    courseEl.onmouseout = () => { if (courseId !== currentCourseId) courseEl.style.backgroundColor = 'transparent'; };
+                    courseEl.querySelector('.delete-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        showDeleteModal(`This will permanently delete the course "${courseId}" and all its documents. This cannot be undone.`, () => deleteCourse(courseId));
+                    });
+                    courseList.appendChild(courseEl);
+                });
+            } catch (err) { console.error("Error loading courses:", err); }
+        }
+
+        async function deleteCourse(courseId) {
+            try {
+                const res = await fetch(`/courses/${encodeURIComponent(courseId)}`, { method: 'DELETE' });
+                if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || `Failed (status ${res.status})`); }
+                if (currentCourseId === courseId) {
+                    currentCourseId = null;
+                    document.getElementById('documents-section').innerHTML = `
+                        <div class="flex flex-col items-center justify-center text-center" style="min-height:300px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-4" style="color:var(--text-dim);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            </svg>
+                            <p class="text-sm" style="color:var(--text-dim);">Select a course to view its documents, or click "Upload Document" to add new materials.</p>
+                        </div>`;
+                }
+                showToast(`Course "${courseId}" deleted successfully.`, 'success');
+                loadCourses();
+            } catch (err) { console.error(err); showToast(err.message, 'error'); }
+        }
+
+        async function deleteDocument(courseId, docTitle) {
+            try {
+                const res = await fetch(`/courses/${encodeURIComponent(courseId)}/docs/${encodeURIComponent(docTitle)}`, { method: 'DELETE' });
+                if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || `Failed (status ${res.status})`); }
+                showToast(`"${docTitle}" deleted successfully.`, 'success');
+                selectCourse(courseId);
+            } catch (err) { console.error(err); showToast(err.message, 'error'); }
+        }
+
+        async function selectCourse(courseId) {
+            currentCourseId = courseId;
+            showDocumentsView();
+            const docSection = document.getElementById('documents-section');
+            docSection.innerHTML = `
+                <div class="flex justify-between items-center mb-6">
+                    <div><h2 class="font-serif text-xl" style="color:var(--text-heading);">${escapeHtml(courseId)}</h2><p class="text-xs" style="color:var(--text-dim);">Loading documents...</p></div>
+                    <button id="add-doc-btn" class="text-xs px-3 py-1.5 rounded-full border flex items-center space-x-1.5 transition-all" style="border-color:var(--border-main);background-color:var(--bg-input);color:var(--text-muted);">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg><span>Add Document</span>
+                    </button>
+                </div>
+                <div class="flex items-center justify-center" style="min-height:200px;"><div class="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style="border-color:var(--text-muted);"></div></div>`;
+            document.getElementById('add-doc-btn').onclick = () => showUploadForm(courseId);
+
+            try {
+                const res = await fetch(`/courses/${encodeURIComponent(courseId)}/documents`);
+                if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || `Failed (status ${res.status})`); }
+                const data = await res.json();
+                const documents = data.documents || [];
+
+                if (documents.length === 0) {
+                    docSection.innerHTML = `
+                        <div class="flex flex-col items-center justify-center text-center" style="min-height:300px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-4" style="color:var(--text-dim);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                            </svg>
+                            <p class="text-sm mb-4" style="color:var(--text-dim);">No documents in ${escapeHtml(courseId)} yet.</p>
+                            <button onclick="showUploadForm(${JSON.stringify(courseId)})" class="px-4 py-2 text-sm font-medium rounded-lg transition-all" style="background-color:var(--accent);color:var(--text-heading);">Upload Document</button>
+                        </div>`;
+                } else {
+                    docSection.innerHTML = `
+                        <div class="flex justify-between items-center mb-6">
+                            <div><h2 class="font-serif text-xl" style="color:var(--text-heading);">${escapeHtml(courseId)}</h2><p class="text-xs" style="color:var(--text-dim);">${documents.length} document${documents.length !== 1 ? 's' : ''}</p></div>
+                            <div class="flex items-center space-x-2">
+                                <button id="delete-course-btn" class="text-xs px-3 py-1.5 rounded-full border flex items-center space-x-1.5 transition-all"
+                                        style="border-color:var(--border-main);background-color:var(--bg-input);color:var(--text-dim);"
+                                        onmouseover="this.style.borderColor='var(--danger)';this.style.color='var(--danger)';this.style.backgroundColor='var(--danger-bg)';"
+                                        onmouseout="this.style.borderColor='var(--border-main)';this.style.color='var(--text-dim)';this.style.backgroundColor='var(--bg-input)';"
+                                        title="Delete entire course and all its documents">
+                                    ${trashIcon('h-3.5 w-3.5')}<span>Delete Course</span>
+                                </button>
+                                <button id="add-doc-btn" class="text-xs px-3 py-1.5 rounded-full border flex items-center space-x-1.5 transition-all"
+                                        style="border-color:var(--border-main);background-color:var(--bg-input);color:var(--text-muted);"
+                                        onmouseover="this.style.backgroundColor='var(--bg-hover)';" onmouseout="this.style.backgroundColor='var(--bg-input)';">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg><span>Add Document</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="space-y-3" id="doc-list-container">
+                            ${documents.map((doc, idx) => {
+                        const title = doc.doc_title || doc.title || doc.name || 'Untitled';
+                        const type = doc.doc_type || doc.type || 'document';
+                        return `
+                                <div class="deletable-row p-4 rounded-lg border flex items-center justify-between pop-in" style="background-color:var(--bg-input);border-color:var(--border-main);animation-delay:${idx * 50}ms;" data-doc-title="${escapeHtml(title)}">
+                                    <div class="flex items-center space-x-3 overflow-hidden">
+                                        <div class="flex-shrink-0">${getDocTypeIcon(type)}</div>
+                                        <div class="overflow-hidden">
+                                            <p class="text-sm font-medium truncate" style="color:var(--text-main);">${escapeHtml(title)}</p>
+                                            <p class="text-xs uppercase tracking-wide" style="color:var(--text-dim);">${escapeHtml(type)}</p>
+                                        </div>
+                                    </div>
+                                    <button class="delete-btn p-2 rounded-lg" style="color:var(--text-dim);" title="Delete document" data-doc-title="${escapeHtml(title)}">${trashIcon('h-4 w-4')}</button>
+                                </div>`;
+                    }).join('')}
+                        </div>`;
+                    document.getElementById('add-doc-btn').onclick = () => showUploadForm(courseId);
+                    document.getElementById('delete-course-btn').onclick = () => {
+                        showDeleteModal(`This will permanently delete the course "${courseId}" and all ${documents.length} document${documents.length !== 1 ? 's' : ''}. This cannot be undone.`, () => deleteCourse(courseId));
+                    };
+                    docSection.querySelectorAll('.deletable-row .delete-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            showDeleteModal(`Delete "${btn.getAttribute('data-doc-title')}" from ${courseId}? This cannot be undone.`, () => deleteDocument(courseId, btn.getAttribute('data-doc-title')));
+                        });
+                    });
+                }
+                loadCourses();
+            } catch (err) {
+                console.error(err);
+                docSection.innerHTML = `
+                    <div class="flex flex-col items-center justify-center text-center" style="min-height:300px;">
+                        <p class="text-sm mb-2" style="color:var(--danger);">Error loading documents</p>
+                        <p class="text-xs mb-4" style="color:var(--text-dim);">${escapeHtml(err.message)}</p>
+                        <button onclick="selectCourse(${JSON.stringify(courseId)})" class="px-4 py-2 text-sm font-medium rounded-lg transition-all" style="background-color:var(--accent);color:var(--text-heading);">Retry</button>
+                    </div>`;
             }
         }
 
-        // --- Upload Logic (Global) ---
         document.getElementById('upload-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('upload-btn');
             const btnText = document.getElementById('upload-text');
             const statusDiv = document.getElementById('upload-status');
-
+            btn.disabled = true; btnText.textContent = 'Processing...'; statusDiv.innerHTML = '';
             const formData = new FormData();
-            formData.append("file", document.getElementById('file_input').files[0]);
-            formData.append("course_id", document.getElementById('course_id_upload').value);
-            formData.append("doc_title", document.getElementById('doc_title').value);
-            formData.append("doc_type", document.getElementById('doc_type_upload').value);
-
-            btn.disabled = true;
-            btnText.innerHTML = 'Processing...';
-            statusDiv.innerHTML = '';
-
+            formData.append('file', document.getElementById('file_input').files[0]);
+            formData.append('course_id', document.getElementById('course_id_upload').value.trim());
+            formData.append('doc_title', document.getElementById('doc_title').value.trim());
+            formData.append('doc_type', document.getElementById('doc_type_upload').value);
             try {
                 const res = await fetch('/add', { method: 'POST', body: formData });
+                if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || `Upload failed (status ${res.status})`); }
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.detail || 'Upload failed');
-
-                statusDiv.innerHTML = `<div class="p-4 rounded-lg border text-sm pop-in" style="background-color: var(--bg-input); color: var(--text-main); border-color: var(--border-hover);">Success! Document processed. ${data.pages_extracted} pages extracted.</div>`;
-                e.target.reset();
+                statusDiv.innerHTML = `<div class="p-4 rounded-lg border" style="background-color:var(--rag-on-bg);border-color:var(--rag-on-border);"><p class="text-sm font-medium" style="color:var(--rag-on-text);">Upload successful</p><p class="text-xs mt-1" style="color:var(--rag-on-text);opacity:0.8;">"${data.doc_title}" added to ${data.course_id} — ${data.pages_extracted} pages extracted</p></div>`;
+                showToast(`"${data.doc_title}" uploaded to ${data.course_id}`, 'success');
+                document.getElementById('upload-form').reset(); loadCourses();
+                if (currentCourseId === data.course_id) selectCourse(data.course_id);
             } catch (err) {
-                statusDiv.innerHTML = `<div class="p-4 rounded-lg border text-sm pop-in" style="background-color: var(--bg-input); color: #ef4444; border-color: #ef4444;">Error: ${err.message}</div>`;
-            } finally {
-                btn.disabled = false;
-                btnText.textContent = 'Upload & Process';
-            }
-        });
-
-        // --- Chat Management Logic ---
-        document.getElementById('new-chat-btn').addEventListener('click', () => {
-            document.getElementById('new-chat-modal').classList.remove('hidden');
-        });
-
-        function closeModal() {
-            document.getElementById('new-chat-modal').classList.add('hidden');
-        }
-
-        document.getElementById('new-chat-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const courseId = document.getElementById('new-course-id').value;
-            const title = document.getElementById('new-chat-title').value;
-            const ragEnable = document.getElementById('new-rag-enable').checked;
-
-            try {
-                const res = await fetch('/chats', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ course_id: courseId, title: title || undefined, rag_enable: ragEnable })
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.detail || 'Failed to create chat');
-
-                closeModal();
-                await loadChats();
-                selectChat(data.chat_id);
-            } catch (err) {
-                alert(err.message);
-            }
+                statusDiv.innerHTML = `<div class="p-4 rounded-lg border" style="background-color:var(--danger-bg);border-color:var(--danger);"><p class="text-sm font-medium" style="color:var(--danger);">Upload failed</p><p class="text-xs mt-1" style="color:var(--danger);opacity:0.8;">${escapeHtml(err.message)}</p></div>`;
+                showToast(err.message, 'error');
+            } finally { btn.disabled = false; btnText.textContent = 'Upload & Process'; }
         });
 
         async function loadChats() {
             try {
                 const res = await fetch('/chats');
-                const chats = await res.json();
+                const data = await res.json();
+                const chats = data.chats || data || [];
                 const chatList = document.getElementById('chat-list');
                 chatList.innerHTML = '';
-
-                if (chats.length === 0) {
-                    chatList.innerHTML = `<p class="text-center text-xs mt-4" style="color: var(--text-dim);">No chats yet.</p>`;
+                if (!Array.isArray(chats) || chats.length === 0) {
+                    chatList.innerHTML = `<p class="text-center text-xs mt-4" style="color:var(--text-dim);">No chats yet.<br>Click "New Chat" to get started.</p>`;
                     return;
                 }
-
                 chats.forEach(chat => {
+                    const chatId = chat.chat_id || chat.id;
+                    const title = chat.title || `Chat ${chatId.slice(0, 8)}`;
+                    const courseId = chat.course_id || '';
+                    const ragEnabled = chat.rag_enable !== false;
                     const chatEl = document.createElement('div');
-                    chatEl.className = `p-3 rounded-lg cursor-pointer flex justify-between items-center group transition-all`;
-                    chatEl.style.backgroundColor = chat.chat_id === currentChatId ? 'var(--bg-hover)' : 'transparent';
+                    chatEl.className = 'p-3 rounded-lg cursor-pointer transition-all group relative';
+                    chatEl.style.backgroundColor = chatId === currentChatId ? 'var(--bg-hover)' : 'transparent';
                     chatEl.innerHTML = `
-                        <div class="flex flex-col overflow-hidden" onclick="selectChat('${chat.chat_id}')">
-                            <span class="text-sm font-medium truncate" style="color: var(--text-main);">${chat.title}</span>
-                            <span class="text-xs" style="color: var(--text-dim);">${chat.course_id}</span>
-                        </div>
-                        <button class="opacity-0 group-hover:opacity-100 transition-all p-1" style="color: var(--text-dim);" onclick="deleteChat('${chat.chat_id}', event)">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3" />
-                            </svg>
-                        </button>
-                    `;
-                    chatEl.onmouseover = () => chatEl.style.backgroundColor = 'var(--bg-hover)';
-                    chatEl.onmouseout = () => chatEl.style.backgroundColor = chat.chat_id === currentChatId ? 'var(--bg-hover)' : 'transparent';
+                        <div class="flex items-center justify-between overflow-hidden">
+                            <div class="flex flex-col overflow-hidden flex-grow min-w-0 pr-2">
+                                <span class="text-sm font-medium truncate" style="color:var(--text-main);">${escapeHtml(title)}</span>
+                                <div class="flex items-center space-x-2 mt-0.5">
+                                    <span class="text-xs truncate" style="color:var(--text-dim);">${escapeHtml(courseId)}</span>
+                                    <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background-color:${ragEnabled ? 'var(--rag-on-text)' : 'var(--text-dim)'};" title="RAG ${ragEnabled ? 'ON' : 'OFF'}"></span>
+                                </div>
+                            </div>
+                            <button class="delete-btn p-1 rounded-md opacity-0 group-hover:opacity-60 hover:!opacity-100 hover:!bg-[var(--danger-hover-bg)] hover:!text-[var(--danger)]"
+                                    style="color:var(--text-dim);" title="Delete chat" data-chat-id="${escapeHtml(chatId)}">${trashIcon('h-3.5 w-3.5')}</button>
+                        </div>`;
+                    chatEl.addEventListener('click', (e) => { if (!e.target.closest('.delete-btn')) selectChat(chatId); });
+                    chatEl.onmouseover = () => { if (chatId !== currentChatId) chatEl.style.backgroundColor = 'var(--bg-hover)'; };
+                    chatEl.onmouseout = () => { if (chatId !== currentChatId) chatEl.style.backgroundColor = 'transparent'; };
+                    chatEl.querySelector('.delete-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        showDeleteModal('Delete this chat and all its messages? This cannot be undone.', () => deleteChat(chatId));
+                    });
                     chatList.appendChild(chatEl);
                 });
-            } catch (err) {
-                console.error("Error loading chats:", err);
-            }
+            } catch (err) { console.error("Error loading chats:", err); }
         }
 
         async function selectChat(chatId) {
             currentChatId = chatId;
-            document.getElementById('question_input').disabled = false;
-            document.getElementById('ask-btn').disabled = false;
-            document.getElementById('doc_type_filter').disabled = false;
-            document.getElementById('chat-upload-btn').disabled = false; // Enable upload btn
-            document.getElementById('question_input').placeholder = "Type your question here...";
-
             try {
                 const res = await fetch(`/chats/${chatId}`);
+                if (!res.ok) throw new Error(`Failed to load chat (status ${res.status})`);
                 const data = await res.json();
-                const meta = data.meta;
-                const messages = data.messages;
-
-                document.getElementById('active-chat-title').textContent = meta.title;
-                document.getElementById('active-course-id').textContent = `Course: ${meta.course_id}`;
-                updateRagToggle(meta.rag_enable, chatId);
-
+                const meta = data.meta || {};
+                const messages = data.messages || [];
+                document.getElementById('active-chat-title').textContent = meta.title || `Chat ${chatId.slice(0, 8)}`;
+                document.getElementById('active-course-id').textContent = meta.course_id || '';
+                document.getElementById('question_input').disabled = false;
+                document.getElementById('ask-btn').disabled = false;
+                document.getElementById('doc_type_filter').disabled = false;
+                document.getElementById('chat-upload-btn').disabled = false;
+                updateRagButton(meta.rag_enable !== false);
                 const chatBox = document.getElementById('chat-box');
                 chatBox.innerHTML = '';
-
                 if (messages.length === 0) {
-                    chatBox.innerHTML = `<div class="text-center text-sm mt-10" style="color: var(--text-dim);"><p>Ask a question about your uploaded materials.</p></div>`;
+                    chatBox.innerHTML = `<div class="text-center text-sm mt-10" style="color:var(--text-dim);"><p>No messages yet. Ask a question to get started.</p></div>`;
                 } else {
-                    messages.forEach(msg => {
-                        appendMessage(msg.role, msg.content, msg.source_refs || []);
-                    });
+                    messages.forEach(msg => chatBox.appendChild(createMessageEl(msg)));
                 }
+                chatBox.scrollTop = chatBox.scrollHeight;
                 loadChats();
-            } catch (err) {
-                console.error("Error loading chat:", err);
-            }
+            } catch (err) { console.error(err); showToast(err.message, 'error'); }
         }
 
-        async function deleteChat(chatId, event) {
-            event.stopPropagation();
-            if (!confirm('Are you sure you want to delete this chat?')) return;
+        function createMessageEl(msg) {
+            const div = document.createElement('div');
+            div.className = 'fade-in-up';
+            if (msg.role === 'user') {
+                div.innerHTML = `<div class="flex justify-end"><div class="max-w-[80%] px-4 py-3 rounded-2xl rounded-br-md" style="background-color:var(--accent);color:var(--text-heading);"><p class="text-sm leading-relaxed">${escapeHtml(msg.content)}</p></div></div>`;
+            } else if (msg.role === 'system') {
+                div.innerHTML = `<div class="flex justify-center"><div class="max-w-[90%] px-4 py-2.5 rounded-xl text-center" style="background-color:var(--bg-input);border:1px solid var(--border-main);"><p class="text-xs" style="color:var(--text-muted);">${marked.parse(msg.content)}</p></div></div>`;
+            } else {
+                let sourcesSection = '';
+                if (msg.source_refs && msg.source_refs.length > 0) {
+                    const uniqueSources = [];
+                    const seen = new Set();
+                    msg.source_refs.forEach(ref => {
+                        const key = `${ref.doc_title}-${ref.page}`;
+                        if (!seen.has(key)) { seen.add(key); uniqueSources.push(ref); }
+                    });
+                    if (uniqueSources.length > 0) {
+                        const sourceTags = uniqueSources.map(s =>
+                            `<span class="text-xs px-2.5 py-1 rounded-full border inline-block" style="background-color:var(--bg-input);border-color:var(--border-main);color:var(--text-muted);">${escapeHtml(s.doc_title)}${s.page ? ` · p${s.page}` : ''}${s.relevance_score != null ? ` · ${s.relevance_score.toFixed(2)}` : ''}</span>`
+                        ).join('');
+                        sourcesSection = `
+                            <div class="mt-3 pt-3" style="border-top:1px solid var(--border-main);">
+                                <button class="sources-toggle" type="button">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" style="color:var(--text-dim);margin-right:6px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                    </svg>
+                                    <span style="color:var(--text-dim);">Sources</span>
+                                    <span class="count-badge">${uniqueSources.length}</span>
+                                    <svg class="chevron h-3 w-3" style="color:var(--text-dim);margin-left:4px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </button>
+                                <div class="sources-body">
+                                    <div class="flex flex-wrap gap-2">${sourceTags}</div>
+                                </div>
+                            </div>`;
+                    }
+                }
+                div.innerHTML = `
+                    <div class="flex justify-start">
+                        <div class="max-w-[85%] px-4 py-3 rounded-2xl rounded-bl-md" style="background-color:var(--bg-input);border:1px solid var(--border-main);">
+                            <div class="markdown-body">${marked.parse(msg.content || '')}</div>
+                            ${sourcesSection}
+                        </div>
+                    </div>`;
+            }
+            return div;
+        }
+
+        document.getElementById('query-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentChatId) return;
+            const input = document.getElementById('question_input');
+            const question = input.value.trim();
+            if (!question) return;
+            const chatBox = document.getElementById('chat-box');
+            const placeholder = chatBox.querySelector('.text-center');
+            if (placeholder) placeholder.remove();
+            chatBox.appendChild(createMessageEl({ role: 'user', content: question }));
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'fade-in-up';
+            typingDiv.innerHTML = `<div class="flex justify-start"><div class="px-4 py-3 rounded-2xl rounded-bl-md flex items-center space-x-1.5" style="background-color:var(--bg-input);border:1px solid var(--border-main);"><div class="typing-dot w-2 h-2 rounded-full" style="background-color:var(--text-muted);"></div><div class="typing-dot w-2 h-2 rounded-full" style="background-color:var(--text-muted);"></div><div class="typing-dot w-2 h-2 rounded-full" style="background-color:var(--text-muted);"></div></div></div>`;
+            chatBox.appendChild(typingDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            input.disabled = true; document.getElementById('ask-btn').disabled = true;
 
             try {
-                await fetch(`/chats/${chatId}`, { method: 'DELETE' });
+                const docTypeFilter = document.getElementById('doc_type_filter').value;
+                const res = await fetch(`/chats/${currentChatId}/message`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question, doc_type: docTypeFilter || null })
+                });
+                if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || `Request failed (status ${res.status})`); }
+                const data = await res.json();
+                typingDiv.remove();
+                chatBox.appendChild(createMessageEl({ role: 'assistant', content: data.answer, source_refs: data.source_refs }));
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (err) {
+                typingDiv.remove();
+                chatBox.appendChild(createMessageEl({ role: 'assistant', content: `Error: ${err.message}` }));
+                chatBox.scrollTop = chatBox.scrollHeight;
+                showToast(err.message, 'error');
+            } finally { input.disabled = false; document.getElementById('ask-btn').disabled = false; input.focus(); }
+        });
+
+        document.getElementById('new-chat-btn').addEventListener('click', () => {
+            document.getElementById('new-chat-modal').classList.remove('hidden');
+            document.getElementById('new-chat-form').reset();
+            document.getElementById('new-rag-enable').checked = true;
+            setTimeout(() => document.getElementById('new-course-id').focus(), 100);
+        });
+        function closeModal() { document.getElementById('new-chat-modal').classList.add('hidden'); }
+
+        document.getElementById('new-chat-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const courseId = document.getElementById('new-course-id').value.trim();
+            const title = document.getElementById('new-chat-title').value.trim();
+            const ragEnable = document.getElementById('new-rag-enable').checked;
+            if (!courseId) return;
+            try {
+                const res = await fetch('/chats', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ course_id: courseId, title: title || null, rag_enable: ragEnable }) });
+                if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || `Failed (status ${res.status})`); }
+                const data = await res.json();
+                closeModal(); selectChat(data.chat_id); showToast('Chat created', 'success');
+            } catch (err) { showToast(err.message, 'error'); }
+        });
+
+        async function deleteChat(chatId) {
+            try {
+                const res = await fetch(`/chats/${chatId}`, { method: 'DELETE' });
+                if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || `Failed (status ${res.status})`); }
                 if (currentChatId === chatId) {
                     currentChatId = null;
-                    document.getElementById('chat-box').innerHTML = `<div class="text-center text-sm mt-10" style="color: var(--text-dim);"><p>Select or start a new chat.</p></div>`;
-                    document.getElementById('active-chat-title').textContent = "Select or start a chat";
-                    document.getElementById('active-course-id').textContent = "";
+                    document.getElementById('active-chat-title').textContent = 'Select or start a chat';
+                    document.getElementById('active-course-id').textContent = '';
                     document.getElementById('question_input').disabled = true;
                     document.getElementById('ask-btn').disabled = true;
                     document.getElementById('doc_type_filter').disabled = true;
-                    document.getElementById('chat-upload-btn').disabled = true; // Disable upload btn
+                    document.getElementById('chat-upload-btn').disabled = true;
+                    document.getElementById('chat-box').innerHTML = `<div class="text-center text-sm mt-10" style="color:var(--text-dim);"><p>Click "New Chat" to start querying your materials.</p></div>`;
+                    updateRagButton(false);
                 }
+                showToast('Chat deleted', 'success');
                 loadChats();
-            } catch (err) {
-                alert('Failed to delete chat');
-            }
+            } catch (err) { console.error(err); showToast(err.message, 'error'); }
         }
 
-        // --- RAG Toggle Logic ---
+        function updateRagButton(enabled) {
+            const btn = document.getElementById('rag-toggle-btn');
+            if (enabled) {
+                btn.style.backgroundColor = 'var(--rag-on-bg)'; btn.style.borderColor = 'var(--rag-on-border)'; btn.style.color = 'var(--rag-on-text)';
+                btn.innerHTML = `<span class="w-2 h-2 rounded-full" style="background-color:var(--rag-on-text);"></span><span>RAG: ON</span>`;
+            } else {
+                btn.style.backgroundColor = 'var(--rag-off-bg)'; btn.style.borderColor = 'var(--border-main)'; btn.style.color = 'var(--rag-off-text)';
+                btn.innerHTML = `<span class="w-2 h-2 rounded-full" style="background-color:var(--rag-off-text);"></span><span>RAG: OFF</span>`;
+            }
+        }
         document.getElementById('rag-toggle-btn').addEventListener('click', async () => {
             if (!currentChatId) return;
             try {
                 const res = await fetch(`/chats/${currentChatId}/rag`, { method: 'PATCH' });
+                if (!res.ok) throw new Error(`Failed (status ${res.status})`);
                 const data = await res.json();
-                if (!res.ok) throw new Error('Failed to toggle RAG');
-                updateRagToggle(data.rag_enabled, currentChatId);
-            } catch (err) {
-                console.error(err);
-            }
+                updateRagButton(data.rag_enabled);
+                showToast(`RAG ${data.rag_enabled ? 'enabled' : 'disabled'}`, 'info');
+            } catch (err) { showToast(err.message, 'error'); }
         });
 
-        function updateRagToggle(isEnabled, chatId) {
-            const btn = document.getElementById('rag-toggle-btn');
-            if (currentChatId !== chatId) return;
-
-            if (isEnabled) {
-                btn.style.backgroundColor = 'var(--rag-on-bg)';
-                btn.style.color = 'var(--rag-on-text)';
-                btn.style.borderColor = 'var(--rag-on-border)';
-                btn.innerHTML = `<span class="w-2 h-2 rounded-full" style="background-color: var(--rag-on-text);"></span><span>RAG: ON</span>`;
-            } else {
-                btn.style.backgroundColor = 'var(--rag-off-bg)';
-                btn.style.color = 'var(--rag-off-text)';
-                btn.style.borderColor = 'var(--border-main)';
-                btn.innerHTML = `<span class="w-2 h-2 rounded-full" style="background-color: var(--rag-off-text);"></span><span>RAG: OFF</span>`;
-            }
-        }
-
-        // --- Upload IN Chat Logic ---
         document.getElementById('chat-upload-btn').addEventListener('click', () => {
             if (!currentChatId) return;
             document.getElementById('chat-upload-modal').classList.remove('hidden');
+            document.getElementById('chat-upload-form').reset();
+            setTimeout(() => document.getElementById('chat_doc_title').focus(), 100);
         });
-
-        function closeChatUploadModal() {
-            document.getElementById('chat-upload-modal').classList.add('hidden');
-        }
+        function closeChatUploadModal() { document.getElementById('chat-upload-modal').classList.add('hidden'); }
 
         document.getElementById('chat-upload-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('chat-upload-submit-btn');
+            if (!currentChatId) return;
+            const submitBtn = document.getElementById('chat-upload-submit-btn');
+            submitBtn.disabled = true; submitBtn.textContent = 'Uploading...';
             const formData = new FormData();
-            formData.append("file", document.getElementById('chat_file_input').files[0]);
-            formData.append("doc_title", document.getElementById('chat_doc_title').value);
-            formData.append("doc_type", document.getElementById('chat_doc_type').value);
-
-            btn.disabled = true;
-            btn.textContent = 'Uploading...';
-
+            formData.append('file', document.getElementById('chat_file_input').files[0]);
+            formData.append('doc_title', document.getElementById('chat_doc_title').value.trim());
+            formData.append('doc_type', document.getElementById('chat_doc_type').value);
             try {
-                // Use backticks and ${currentChatId} here!
-                const res = await fetch(`/chats/${currentChatId}/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
+                const res = await fetch(`/chats/${currentChatId}/upload`, { method: 'POST', body: formData });
+                if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || `Upload failed (status ${res.status})`); }
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.detail || 'Upload failed');
-
-                // Close modal and reset form
                 closeChatUploadModal();
-                e.target.reset();
-
-                // Reload the chat to display the new "system" message left by the backend
-                await selectChat(currentChatId);
-            } catch (err) {
-                alert(`Error: ${err.message}`);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Upload & Pin';
-            }
+                showToast(`"${data.doc_title}" uploaded and pinned (${data.chunks_pinned} chunks)`, 'success');
+                selectChat(currentChatId);
+            } catch (err) { showToast(err.message, 'error'); }
+            finally { submitBtn.disabled = false; submitBtn.textContent = 'Upload & Pin'; }
         });
 
-        // --- Messaging Logic ---
-        document.getElementById('query-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const question = document.getElementById('question_input').value;
-            const docType = document.getElementById('doc_type_filter').value;
-            const btn = document.getElementById('ask-btn');
-
-            appendMessage('user', question);
-            document.getElementById('question_input').value = '';
-            btn.disabled = true;
-            document.getElementById('question_input').disabled = true;
-            document.getElementById('doc_type_filter').disabled = true;
-
-            const typingIndicator = appendTypingIndicator();
-
-            try {
-                const res = await fetch(`/chats/${currentChatId}/message`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        question: question,
-                        doc_type: docType || null
-                    })
-                });
-                const data = await res.json();
-                typingIndicator.remove();
-
-                if (!res.ok) throw new Error(data.detail || 'Query failed');
-                appendMessage('assistant', data.answer, data.source_refs);
-
-            } catch (err) {
-                typingIndicator.remove();
-                appendMessage('assistant', `Error: ${err.message}`, []);
-            } finally {
-                btn.disabled = false;
-                document.getElementById('question_input').disabled = false;
-                document.getElementById('doc_type_filter').disabled = false;
-                document.getElementById('question_input').focus();
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (!document.getElementById('delete-modal').classList.contains('hidden')) closeDeleteModal();
+                else if (!document.getElementById('new-chat-modal').classList.contains('hidden')) closeModal();
+                else if (!document.getElementById('chat-upload-modal').classList.contains('hidden')) closeChatUploadModal();
             }
         });
-
-        function appendTypingIndicator() {
-            const chatBox = document.getElementById('chat-box');
-            const wrapper = document.createElement('div');
-            wrapper.className = 'flex justify-start pop-in';
-            wrapper.innerHTML = `
-                <div class="border rounded-2xl px-5 py-4 flex items-center space-x-2" style="background-color: var(--bg-input); border-color: var(--border-main);">
-                    <div class="w-2 h-2 rounded-full typing-dot" style="background-color: var(--text-muted);"></div>
-                    <div class="w-2 h-2 rounded-full typing-dot" style="background-color: var(--text-muted);"></div>
-                    <div class="w-2 h-2 rounded-full typing-dot" style="background-color: var(--text-muted);"></div>
-                </div>
-            `;
-            chatBox.appendChild(wrapper);
-            chatBox.scrollTop = chatBox.scrollHeight;
-            return wrapper;
-        }
-
-        function appendMessage(role, content, sources = []) {
-            const chatBox = document.getElementById('chat-box');
-            const wrapper = document.createElement('div');
-            // System messages (like pinned PDFs) should also align left like assistant
-            wrapper.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} pop-in w-full`;
-
-            let sourcesHtml = '';
-            if (sources.length > 0) {
-                sourcesHtml = `
-                    <div class="sources-content hidden mt-4 pt-4 border-t" style="border-color: var(--border-main);">
-                        <div class="space-y-2">
-                            ${sources.map(s => `
-                                <div class="text-xs rounded-md p-3 border flex justify-between items-center" style="background-color: var(--bg-input); border-color: var(--border-main);">
-                                    <div>
-                                        <span class="font-medium" style="color: var(--text-main);">${s.doc_title}</span> 
-                                        <span class="ml-1" style="color: var(--text-muted);">(Pg ${s.page} &middot; ${s.doc_type})</span>
-                                    </div>
-                                    <span class="font-medium" style="color: var(--text-dim);">${(s.relevance_score * 100).toFixed(1)}%</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-
-            let innerHtml = '';
-            if (role === 'user') {
-                innerHtml = `
-                    <div class="max-w-[80%] rounded-2xl rounded-br-md px-5 py-3 shadow-sm" style="background-color: var(--accent);">
-                        <p class="text-[15px] leading-7 whitespace-pre-wrap" style="color: var(--text-heading);">${escapeHtml(content)}</p>
-                    </div>
-                `;
-            } else {
-                const renderedContent = marked.parse(content);
-                const sourcesBtn = sources.length > 0 ? `
-                    <button onclick="toggleSources(this)" class="mt-3 text-xs font-medium flex items-center space-x-1.5 border px-3 py-1.5 rounded-full transition-all" style="color: var(--text-muted); background-color: var(--bg-input); border-color: var(--border-main);" onmouseover="this.style.backgroundColor='var(--bg-hover)';" onmouseout="this.style.backgroundColor='var(--bg-input)';">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                        </svg>
-                        <span>Show sources (${sources.length})</span>
-                    </button>
-                ` : '';
-
-                innerHtml = `
-                    <div class="max-w-[85%] w-full lg:max-w-[80%]">
-                        <div class="markdown-body p-4 rounded-xl border" style="background-color: var(--bg-input); border-color: var(--border-main);">
-                            ${renderedContent}
-                        </div>
-                        ${sourcesBtn}
-                        ${sourcesHtml}
-                    </div>
-                `;
-            }
-
-            wrapper.innerHTML = innerHtml;
-            chatBox.appendChild(wrapper);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        function toggleSources(btn) {
-            const sourcesDiv = btn.nextElementSibling;
-            if (!sourcesDiv) return;
-            const isHidden = sourcesDiv.classList.toggle('hidden');
-            const textSpan = btn.querySelector('span');
-            if (textSpan) {
-                textSpan.textContent = isHidden ? textSpan.textContent.replace('Hide', 'Show') : textSpan.textContent.replace('Show', 'Hide');
-            }
-        }
     </script>
 </body>
 
