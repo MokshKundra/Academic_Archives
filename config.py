@@ -4,7 +4,7 @@ from typing import Literal, Optional
 
 class Settings(BaseSettings):
     ext_provider : Literal["ollama", "openai", "gemini","groq", "huggingface", "zai"] = "ollama"
-    ext_model_ollama: str = "doc-extractor"
+    ext_model_ollama: str = "minicpm-v"
     ext_model_openai: str = "gpt-4o" 
     ext_model_gemini: str = "gemini-3.1-flash-lite"
     ext_model_groq: str = "llama-3.3-70b-versatile"

@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import HTMLResponse
 from typing import Literal
 import os
+import re
 import tempfile
 from upload_schema import Document
 from upload import addToCousreCollection
@@ -12,6 +13,9 @@ from chat_store import get_chat_meta, get_messages, append_message, list_chats, 
 from chat_store import create_chat as store_create_chat
 from chunking import chunk_content
 from retrival import list_courses, list_docs_in_collection, delete_doc_from_collection, delete_collection
+from job_store import list_jobs, get_job, create_job
+from jobs import process_upload_job
+import threading
 
 app = FastAPI()
 
@@ -22,6 +26,12 @@ async def read_root():
         return f.read()
 
 
+def sanitize_course_id(v: str) -> str:
+    v = v.strip().upper()
+    v = re.sub(r"[^a-zA-Z0-9._-]", "_", v)
+    v = re.sub(r"_+", "_", v)
+    return v
+
 @app.post("/add")
 async def addToDatabase(file : UploadFile = File(...), course_id : str = Form(...), doc_title : str = Form(...), doc_type : Literal["slides", "pyqs", "notes", "textbook"] = Form(...)):
     if not file.filename.endswith(".pdf"):
@@ -31,31 +41,29 @@ async def addToDatabase(file : UploadFile = File(...), course_id : str = Form(..
         contents = await file.read()
         tmp.write(contents)
         tmp_path = tmp.name    
-    try:
-        extracted_contents = extractor(tmp_path, doc_title)
-        doc = Document(
-            course_id=course_id,
-            doc_title=doc_title,
-            doc_type=doc_type,
-            content=extracted_contents
-        )
 
-        addToCousreCollection(doc)
+    sanitized_course_id = sanitize_course_id(course_id)
 
-        return {
-            "status": "success",
-            "course_id": doc.course_id,
-            "doc_title": doc.doc_title,
-            "doc_type": doc.doc_type,
-            "pages_extracted": extracted_contents.count("--- Page")
-        }
-    except ValueError as e:
-        raise HTTPException(status_code=422, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"EXTRACTION FAILED :: {str(e)}")
-    finally:
-        os.unlink(tmp_path)
+    job_id = create_job(
+        course_id=sanitized_course_id,
+        doc_title=doc_title,
+        doc_type=doc_type
+    )
 
+    thread = threading.Thread(
+        target=process_upload_job,
+        args=(job_id, tmp_path, sanitized_course_id, doc_title, doc_type),
+        daemon=True
+    )
+    thread.start()
+
+    return {
+        "status": "queued",
+        "job_id": job_id,
+        "course_id": sanitized_course_id,
+        "doc_title": doc_title,
+        "doc_type": doc_type
+    }
 
 
 
@@ -226,3 +234,15 @@ def delete_course(course_id: str):
         return result
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    
+
+@app.get("/jobs/{job_id}")
+def job_status(job_id: str):
+    try:
+        return get_job(job_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@app.get("/jobs")
+def all_jobs():
+    return list_jobs()

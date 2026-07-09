@@ -18,14 +18,17 @@ def image_to_b64(pg_img) -> str:
     pg_img.save(buf, format="JPEG")
     return base64.b64encode(buf.getvalue()).decode("utf-8")
 
-def extractor(pdf_path : str, doc_title: str) -> str :
+def extractor(pdf_path : str, doc_title: str, on_page_done = None) -> str :
     with pdfplumber.open(pdf_path) as pdf:
         full_context = ""
         poppler_path = settings.poppler_path
 
         print("--- doc processing started ---")
 
-        for i, page in enumerate(pdf.pages):
+        pages = pdf.pages
+        total_pages = len(pages)
+
+        for i, page in enumerate(pages):
             print(f"--- on page {i + 1} ---")
 
             extracted_text = page.extract_text()
@@ -57,5 +60,8 @@ def extractor(pdf_path : str, doc_title: str) -> str :
             
             full_context += f"\n\n--- Page {i+1} --- (Doc Title:{doc_title} --- \n"
             full_context += page_content
+
+            if on_page_done:
+                on_page_done(i + 1, total_pages)
 
         return full_context

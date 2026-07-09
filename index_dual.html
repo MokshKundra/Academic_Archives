@@ -450,6 +450,10 @@
     <div id="toast-container" class="fixed top-20 right-6 z-[60] flex flex-col items-end space-y-2 pointer-events-none">
     </div>
 
+    <!-- Upload Progress Container -->
+    <div id="upload-progress-container"
+        class="fixed bottom-6 right-6 z-[60] flex flex-col items-end space-y-3 w-80 pointer-events-none"></div>
+
     <nav class="backdrop-blur-md border-b sticky top-0 z-40"
         style="background-color: var(--bg-card); border-color: var(--border-main);">
         <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -1112,12 +1116,13 @@
             }
         }
 
+        // --- New Parallelized Upload Logic ---
         document.getElementById('upload-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('upload-btn');
             const btnText = document.getElementById('upload-text');
             const statusDiv = document.getElementById('upload-status');
-            btn.disabled = true; btnText.textContent = 'Processing...'; statusDiv.innerHTML = '';
+            btn.disabled = true; btnText.textContent = 'Uploading...'; statusDiv.innerHTML = '';
             const formData = new FormData();
             formData.append('file', document.getElementById('file_input').files[0]);
             formData.append('course_id', document.getElementById('course_id_upload').value.trim());
@@ -1127,15 +1132,127 @@
                 const res = await fetch('/add', { method: 'POST', body: formData });
                 if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || `Upload failed (status ${res.status})`); }
                 const data = await res.json();
-                statusDiv.innerHTML = `<div class="p-4 rounded-lg border" style="background-color:var(--rag-on-bg);border-color:var(--rag-on-border);"><p class="text-sm font-medium" style="color:var(--rag-on-text);">Upload successful</p><p class="text-xs mt-1" style="color:var(--rag-on-text);opacity:0.8;">"${data.doc_title}" added to ${data.course_id} — ${data.pages_extracted} pages extracted</p></div>`;
-                showToast(`"${data.doc_title}" uploaded to ${data.course_id}`, 'success');
-                document.getElementById('upload-form').reset(); loadCourses();
-                if (currentCourseId === data.course_id) selectCourse(data.course_id);
+
+                // Start tracking the job in background
+                startJobTracking(data);
+
+                // Reset form and return to documents view immediately
+                document.getElementById('upload-form').reset();
+                showDocumentsView();
+                showToast(`Upload started for "${data.doc_title}"`, 'info');
             } catch (err) {
                 statusDiv.innerHTML = `<div class="p-4 rounded-lg border" style="background-color:var(--danger-bg);border-color:var(--danger);"><p class="text-sm font-medium" style="color:var(--danger);">Upload failed</p><p class="text-xs mt-1" style="color:var(--danger);opacity:0.8;">${escapeHtml(err.message)}</p></div>`;
                 showToast(err.message, 'error');
             } finally { btn.disabled = false; btnText.textContent = 'Upload & Process'; }
         });
+
+        function startJobTracking(jobData) {
+            const container = document.getElementById('upload-progress-container');
+            const card = document.createElement('div');
+            card.className = 'toast-enter w-full pointer-events-auto rounded-xl border shadow-xl p-4';
+            card.style.cssText = `background-color: var(--bg-card); border-color: var(--border-main); transition: opacity 0.3s ease, transform 0.3s ease;`;
+
+            card.innerHTML = `
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0 mt-0.5" id="job-icon-container">
+                        <div class="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style="border-color: var(--text-muted);"></div>
+                    </div>
+                    <div class="flex-grow min-w-0">
+                        <div class="flex justify-between items-center">
+                            <p class="text-sm font-medium truncate" style="color: var(--text-heading);" id="job-title-text">Processing "${escapeHtml(jobData.doc_title)}"</p>
+                            <button class="flex-shrink-0 -mt-1 -mr-1 p-1 text-[var(--text-dim)] hover:text-[var(--text-main)] transition-colors" onclick="this.closest('.toast-enter').remove()">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                        <p class="text-xs mt-0.5 mb-2" style="color: var(--text-dim);" id="job-status-text">Initializing...</p>
+                        <div class="w-full h-1.5 rounded-full overflow-hidden" style="background-color: var(--bg-hover);">
+                            <div id="job-progress-bar" class="h-full rounded-full transition-all duration-500" style="width: 5%; background-color: var(--accent);"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+            pollJob(jobData.job_id, card);
+        }
+
+        async function pollJob(jobId, card) {
+            // If the card was manually removed by the user, stop polling
+            if (!document.body.contains(card)) return;
+
+            try {
+                const res = await fetch(`/jobs/${jobId}`);
+                if (!res.ok) throw new Error('Failed to fetch job status');
+                const data = await res.json();
+
+                const statusText = card.querySelector('#job-status-text');
+                const iconContainer = card.querySelector('#job-icon-container');
+                const progressBar = card.querySelector('#job-progress-bar');
+
+                const status = data.status || 'queued';
+                const progress = data.progress || { current_page: 0, total_pages: 0 };
+
+                // Update Text based on exact states from JobStatus enum
+                if (status === 'queued') {
+                    statusText.textContent = 'Queued for extraction...';
+                    progressBar.style.width = '5%';
+                } else if (status === 'extracting') {
+                    const current = progress.current_page || 0;
+                    const total = progress.total_pages || 0;
+                    if (total > 0) {
+                        statusText.textContent = `Extracting page ${current} of ${total}...`;
+                        progressBar.style.width = `${5 + (current / total) * 80}%`; // Scale from 5% to 85%
+                    } else {
+                        statusText.textContent = 'Extracting PDF...';
+                        progressBar.style.width = '10%';
+                    }
+                } else if (status === 'embedding') {
+                    statusText.textContent = 'Generating embeddings and saving to database...';
+                    progressBar.style.width = '90%';
+                } else if (status === 'done') {
+                    progressBar.style.width = '100%';
+                    progressBar.style.backgroundColor = 'var(--rag-on-border)';
+
+                    iconContainer.innerHTML = `<div class="w-5 h-5 rounded-full flex items-center justify-center" style="background-color: var(--rag-on-bg); border: 1px solid var(--rag-on-border);"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" style="color: var(--rag-on-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>`;
+
+                    statusText.textContent = 'Completed successfully!';
+                    statusText.style.color = 'var(--rag-on-text)';
+                    card.style.borderColor = 'var(--rag-on-border)';
+
+                    showToast(`"${data.doc_title}" uploaded to ${data.course_id}`, 'success');
+                    loadCourses();
+                    if (currentCourseId === data.course_id) {
+                        selectCourse(currentCourseId);
+                    }
+
+                    // Stop polling, keep card visible for 8 seconds
+                    setTimeout(() => {
+                        if (document.body.contains(card)) {
+                            card.style.opacity = '0';
+                            card.style.transform = 'translateY(10px)';
+                            setTimeout(() => card.remove(), 300);
+                        }
+                    }, 8000);
+                    return; // Exit function to prevent further polling
+                } else if (status === 'failed') {
+                    progressBar.style.width = '100%';
+                    progressBar.style.backgroundColor = 'var(--danger)';
+
+                    iconContainer.innerHTML = `<div class="w-5 h-5 rounded-full flex items-center justify-center" style="background-color: var(--danger-bg); border: 1px solid var(--danger);"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" style="color: var(--danger);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></div>`;
+
+                    statusText.textContent = data.error || 'Upload failed';
+                    statusText.style.color = 'var(--danger)';
+                    card.style.borderColor = 'var(--danger)';
+                    return; // Exit, card stays until user dismisses
+                }
+
+                // Poll again after delay
+                setTimeout(() => pollJob(jobId, card), 1000);
+
+            } catch (err) {
+                console.error(err);
+                setTimeout(() => pollJob(jobId, card), 3000);
+            }
+        }
 
         async function loadChats() {
             try {
