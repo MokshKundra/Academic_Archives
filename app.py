@@ -16,6 +16,8 @@ from retrival import list_courses, list_docs_in_collection, delete_doc_from_coll
 from job_store import list_jobs, get_job, create_job
 from jobs import process_upload_job
 import threading
+from upload_state import is_upload_in_progress
+from config import settings
 
 app = FastAPI()
 
@@ -95,13 +97,18 @@ def send_message(chat_id: str, req: ChatMessageRequest):
 
     _, user_idx = append_message(chat_id, role="user", content=req.question)
 
+    if settings.auto_rag_disable:
+        rag_enable = meta["rag_enable"] and not is_upload_in_progress()
+    else:
+        rag_enable = meta["rag_enable"]
+
     response, chunks = augmente_and_generate(
         question=req.question,
         doc_type= req.doc_type,
         course_id=meta["course_id"],
         chat_hist=chat_hist,
         chat_id= chat_id,
-        rag_enable=meta["rag_enable"]
+        rag_enable=rag_enable
     )
 
     all_chunks = (
@@ -131,7 +138,8 @@ def send_message(chat_id: str, req: ChatMessageRequest):
         "answer": response,
         "source_refs": source_refs,
         "chat_id": chat_id,
-        "message_idx": assistant_idx
+        "message_idx": assistant_idx,
+        "rag_active_this_turn": rag_enable
     }
 
 @app.delete("/chats/{chat_id}")

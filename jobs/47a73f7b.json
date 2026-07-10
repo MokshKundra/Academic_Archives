@@ -1,0 +1,14 @@
+{
+  "job_id": "47a73f7b",
+  "status": "extracting",
+  "course_id": "QNT",
+  "doc_title": "PYTHON_FOR_FINANCE",
+  "doc_type": "textbook",
+  "progress": {
+    "current_page": 200,
+    "total_pages": 714
+  },
+  "error": null,
+  "created_at": "2026-07-11T01:27:45.254083",
+  "updated_at": "2026-07-11T01:35:55.859931"
+}

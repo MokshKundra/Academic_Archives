@@ -863,6 +863,7 @@
         let currentChatId = null;
         let currentCourseId = null;
         let deleteCallback = null;
+        let currentChatRagEnabled = false;
 
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
@@ -1312,6 +1313,7 @@
                 document.getElementById('doc_type_filter').disabled = false;
                 document.getElementById('chat-upload-btn').disabled = false;
                 updateRagButton(meta.rag_enable !== false);
+                currentChatRagEnabled = meta.rag_enable !== false;
                 const chatBox = document.getElementById('chat-box');
                 chatBox.innerHTML = '';
                 if (messages.length === 0) {
@@ -1404,6 +1406,13 @@
                 const data = await res.json();
                 typingDiv.remove();
                 chatBox.appendChild(createMessageEl({ role: 'assistant', content: data.answer, source_refs: data.source_refs }));
+
+                // Check if RAG was auto-disabled by the backend
+                if (currentChatRagEnabled && data.rag_active_this_turn === false) {
+                    const noticeContent = "ℹ️ **RAG was temporarily disabled for this response** because a document upload is in progress. This prevents local model crashes. You can change this behavior by updating `auto_rag_disable` in your config settings.";
+                    chatBox.appendChild(createMessageEl({ role: 'system', content: noticeContent }));
+                }
+
                 chatBox.scrollTop = chatBox.scrollHeight;
             } catch (err) {
                 typingDiv.remove();
@@ -1449,6 +1458,7 @@
                     document.getElementById('chat-upload-btn').disabled = true;
                     document.getElementById('chat-box').innerHTML = `<div class="text-center text-sm mt-10" style="color:var(--text-dim);"><p>Click "New Chat" to start querying your materials.</p></div>`;
                     updateRagButton(false);
+                    currentChatRagEnabled = false;
                 }
                 showToast('Chat deleted', 'success');
                 loadChats();
@@ -1472,6 +1482,7 @@
                 if (!res.ok) throw new Error(`Failed (status ${res.status})`);
                 const data = await res.json();
                 updateRagButton(data.rag_enabled);
+                currentChatRagEnabled = data.rag_enabled;
                 showToast(`RAG ${data.rag_enabled ? 'enabled' : 'disabled'}`, 'info');
             } catch (err) { showToast(err.message, 'error'); }
         });

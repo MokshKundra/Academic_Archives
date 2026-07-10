@@ -85,6 +85,9 @@ def _gen_gemini(messages: list[dict]) -> str:
                 "parts": [{"text": msg["content"]}]
             })
     
+
+##add temp settings 
+
     config = None
     if system_instruction:
         config = genai.types.GenerateContentConfig(

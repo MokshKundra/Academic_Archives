@@ -64,7 +64,8 @@ def ext_page(imgb64 : str, extracted_text : str | None) -> str:
     
 
 def _ext_ollama(imgb64 : str, prompt : str) -> str:
-     response = ollama.chat(
+     client = ollama.Client(timeout = None)
+     response = client.chat(
           model= settings.ext_model_ollama,
           messages=[{
                "role" : "user",

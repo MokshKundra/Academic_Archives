@@ -33,6 +33,8 @@ class Settings(BaseSettings):
 
     poppler_path: Optional[str] = None
 
+    auto_rag_disable : bool = True
+
     model_config = {"env_file": ".env"}
 
 
