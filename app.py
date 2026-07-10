@@ -89,13 +89,13 @@ def get_chat(chat_id : str):
 def send_message(chat_id: str, req: ChatMessageRequest):
     meta = get_chat_meta(chat_id)
 
+    _, user_idx = append_message(chat_id, role="user", content=req.question)
+
     history = get_messages(chat_id)
     chat_hist = [
         {"role": m["role"], "content": m["content"]}
         for m in history[:-1]
     ]
-
-    _, user_idx = append_message(chat_id, role="user", content=req.question)
 
     if settings.auto_rag_disable:
         rag_enable = meta["rag_enable"] and not is_upload_in_progress()
