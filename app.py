@@ -18,6 +18,7 @@ from jobs import process_upload_job
 import threading
 from upload_state import is_upload_in_progress
 from config import settings
+from queue_worker import enqueue_upload, queue_size
 
 app = FastAPI()
 
@@ -35,14 +36,19 @@ def sanitize_course_id(v: str) -> str:
     return v
 
 @app.post("/add")
-async def addToDatabase(file : UploadFile = File(...), course_id : str = Form(...), doc_title : str = Form(...), doc_type : Literal["slides", "pyqs", "notes", "textbook"] = Form(...)):
+async def addToDatabase(
+    file: UploadFile = File(...),
+    course_id: str = Form(...),
+    doc_title: str = Form(...),
+    doc_type: Literal["slides", "pyqs", "notes", "textbook"] = Form(...)
+):
     if not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
-    
+
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
         contents = await file.read()
         tmp.write(contents)
-        tmp_path = tmp.name    
+        tmp_path = tmp.name
 
     sanitized_course_id = sanitize_course_id(course_id)
 
@@ -52,22 +58,57 @@ async def addToDatabase(file : UploadFile = File(...), course_id : str = Form(..
         doc_type=doc_type
     )
 
-    thread = threading.Thread(
-        target=process_upload_job,
-        args=(job_id, tmp_path, sanitized_course_id, doc_title, doc_type),
-        daemon=True
-    )
-    thread.start()
+    enqueue_upload(job_id, tmp_path, sanitized_course_id, doc_title, doc_type)
 
     return {
         "status": "queued",
         "job_id": job_id,
         "course_id": sanitized_course_id,
         "doc_title": doc_title,
-        "doc_type": doc_type
+        "doc_type": doc_type,
+        "position_in_queue": queue_size()
     }
 
+@app.post("/add/batch")
+async def addBatchToDatabase(
+    files: list[UploadFile] = File(...),
+    course_id: str = Form(...),
+    doc_type: Literal["slides", "pyqs", "notes", "textbook"] = Form(...)
+):
+    sanitized_course_id = sanitize_course_id(course_id)
+    queued_jobs = []
 
+    for file in files:
+        if not file.filename.endswith(".pdf"):
+            continue  # skip non-PDFs silently, or collect errors if you prefer
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+            contents = await file.read()
+            tmp.write(contents)
+            tmp_path = tmp.name
+
+        doc_title = file.filename.rsplit(".pdf", 1)[0]  # derive title from filename
+
+        job_id = create_job(
+            course_id=sanitized_course_id,
+            doc_title=doc_title,
+            doc_type=doc_type
+        )
+
+        enqueue_upload(job_id, tmp_path, sanitized_course_id, doc_title, doc_type)
+
+        queued_jobs.append({"job_id": job_id, "doc_title": doc_title})
+
+    return {
+        "status": "queued",
+        "course_id": sanitized_course_id,
+        "jobs": queued_jobs,
+        "queue_length": queue_size()
+    }
+
+@app.get("/queue")
+def get_queue_status():
+    return {"pending": queue_size()}
 
 
 @app.get("/chats")

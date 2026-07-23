@@ -5,7 +5,7 @@ from pathlib import Path
 import json
 from providers.emb import get_embedding_function
 
-client = chromadb.PersistentClient(path= "./chroma_db")
+client = chromadb.PersistentClient(path= "./chroma_db_mac")
 ef = get_embedding_function()
    
 

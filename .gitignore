@@ -16,6 +16,7 @@ env/
 
 # chromadb data
 chroma_db/
+chroma_db_mac/
 
 # chat data (has your personal content)
 chats/

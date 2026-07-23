@@ -5,7 +5,7 @@ import re
 from chunking import chunk_content
 from providers.emb import get_embedding_function
 
-client = chromadb.PersistentClient(path= "./chroma_db")
+client = chromadb.PersistentClient(path= "./chroma_db_mac")
 ef = get_embedding_function()
 
 def addToCousreCollection(doc : Document):

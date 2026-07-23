@@ -597,10 +597,19 @@
                         <div>
                             <label class="block text-xs font-medium uppercase tracking-wide mb-2"
                                 style="color: var(--text-muted);">Document Title</label>
-                            <input type="text" id="doc_title" required
+                            <input type="text" id="doc_title"
                                 class="w-full px-4 py-3 border rounded-lg outline-none transition-all"
                                 style="background-color: var(--bg-input); border-color: var(--border-main); color: var(--text-main);"
                                 placeholder="e.g., Intro to Algorithms">
+                            <div class="field-hint" id="doc-title-hint">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>Required for single file. For multiple files, titles are auto-derived from
+                                    filenames.</span>
+                            </div>
                         </div>
                         <div>
                             <label class="block text-xs font-medium uppercase tracking-wide mb-2"
@@ -616,9 +625,17 @@
                         </div>
                         <div>
                             <label class="block text-xs font-medium uppercase tracking-wide mb-2"
-                                style="color: var(--text-muted);">PDF File</label>
-                            <input type="file" id="file_input" accept=".pdf" required
+                                style="color: var(--text-muted);">PDF File(s)</label>
+                            <input type="file" id="file_input" accept=".pdf" required multiple
                                 class="w-full text-sm cursor-pointer transition-all" style="color: var(--text-muted);">
+                            <div class="field-hint">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>Select one or more PDFs. Multiple files will be queued as a batch upload.</span>
+                            </div>
                         </div>
                         <button type="submit" id="upload-btn"
                             class="w-full font-medium py-3 rounded-lg transition-all flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
@@ -952,6 +969,8 @@
             document.getElementById('documents-section').classList.add('hidden');
             document.getElementById('course_id_upload').value = courseId;
             document.getElementById('upload-status').innerHTML = '';
+            document.getElementById('file_input').value = '';
+            updateDocTitleField();
             if (courseId) setTimeout(() => document.getElementById('doc_title').focus(), 50);
         }
         function showDocumentsView() {
@@ -959,6 +978,27 @@
             document.getElementById('documents-section').classList.remove('hidden');
         }
         document.getElementById('upload-new-btn').addEventListener('click', () => showUploadForm(''));
+
+        // --- Dynamic doc_title field toggle based on file count ---
+        function updateDocTitleField() {
+            const fileInput = document.getElementById('file_input');
+            const docTitleInput = document.getElementById('doc_title');
+            const hint = document.getElementById('doc-title-hint');
+            const files = fileInput.files;
+            if (files && files.length > 1) {
+                docTitleInput.disabled = true;
+                docTitleInput.required = false;
+                docTitleInput.value = '';
+                docTitleInput.placeholder = `Auto-derived from ${files.length} filenames`;
+                hint.querySelector('span').textContent = `Batch mode: ${files.length} files selected. Titles will be auto-derived from filenames.`;
+            } else {
+                docTitleInput.disabled = false;
+                docTitleInput.required = true;
+                docTitleInput.placeholder = 'e.g., Intro to Algorithms';
+                hint.querySelector('span').textContent = 'Required for single file. For multiple files, titles are auto-derived from filenames.';
+            }
+        }
+        document.getElementById('file_input').addEventListener('change', updateDocTitleField);
 
         async function loadCourses() {
             try {
@@ -1117,41 +1157,80 @@
             }
         }
 
-        // --- New Parallelized Upload Logic ---
+        // --- Upload Logic (supports single + batch via queue) ---
         document.getElementById('upload-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('upload-btn');
             const btnText = document.getElementById('upload-text');
             const statusDiv = document.getElementById('upload-status');
-            btn.disabled = true; btnText.textContent = 'Uploading...'; statusDiv.innerHTML = '';
-            const formData = new FormData();
-            formData.append('file', document.getElementById('file_input').files[0]);
-            formData.append('course_id', document.getElementById('course_id_upload').value.trim());
-            formData.append('doc_title', document.getElementById('doc_title').value.trim());
-            formData.append('doc_type', document.getElementById('doc_type_upload').value);
-            try {
-                const res = await fetch('/add', { method: 'POST', body: formData });
-                if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || `Upload failed (status ${res.status})`); }
-                const data = await res.json();
+            const fileInput = document.getElementById('file_input');
+            const files = fileInput.files;
 
-                // Start tracking the job in background
-                startJobTracking(data);
+            if (!files || files.length === 0) return;
+
+            btn.disabled = true; btnText.textContent = 'Uploading...'; statusDiv.innerHTML = '';
+            const courseId = document.getElementById('course_id_upload').value.trim();
+            const docType = document.getElementById('doc_type_upload').value;
+
+            try {
+                if (files.length === 1) {
+                    // --- Single file upload via /add ---
+                    const formData = new FormData();
+                    formData.append('file', files[0]);
+                    formData.append('course_id', courseId);
+                    formData.append('doc_title', document.getElementById('doc_title').value.trim());
+                    formData.append('doc_type', docType);
+
+                    const res = await fetch('/add', { method: 'POST', body: formData });
+                    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || `Upload failed (status ${res.status})`); }
+                    const data = await res.json();
+
+                    startJobTracking(data, data.position_in_queue || null);
+                    showToast(`Upload queued for "${data.doc_title}"${data.position_in_queue ? ` (position ${data.position_in_queue})` : ''}`, 'info');
+                } else {
+                    // --- Batch upload via /add/batch ---
+                    const formData = new FormData();
+                    for (let i = 0; i < files.length; i++) {
+                        formData.append('files', files[i]);
+                    }
+                    formData.append('course_id', courseId);
+                    formData.append('doc_type', docType);
+
+                    const res = await fetch('/add/batch', { method: 'POST', body: formData });
+                    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.detail || `Batch upload failed (status ${res.status})`); }
+                    const data = await res.json();
+
+                    const numJobs = data.jobs.length;
+                    data.jobs.forEach((job, idx) => {
+                        // Estimate position: first file enqueued first, so it's closer to front of queue
+                        const estimatedPosition = data.queue_length - numJobs + 1 + idx;
+                        startJobTracking(
+                            { job_id: job.job_id, doc_title: job.doc_title, course_id: data.course_id },
+                            estimatedPosition
+                        );
+                    });
+                    showToast(`${numJobs} files queued for batch upload`, 'info');
+                }
 
                 // Reset form and return to documents view immediately
                 document.getElementById('upload-form').reset();
+                updateDocTitleField();
                 showDocumentsView();
-                showToast(`Upload started for "${data.doc_title}"`, 'info');
             } catch (err) {
                 statusDiv.innerHTML = `<div class="p-4 rounded-lg border" style="background-color:var(--danger-bg);border-color:var(--danger);"><p class="text-sm font-medium" style="color:var(--danger);">Upload failed</p><p class="text-xs mt-1" style="color:var(--danger);opacity:0.8;">${escapeHtml(err.message)}</p></div>`;
                 showToast(err.message, 'error');
             } finally { btn.disabled = false; btnText.textContent = 'Upload & Process'; }
         });
 
-        function startJobTracking(jobData) {
+        function startJobTracking(jobData, initialPosition = null) {
             const container = document.getElementById('upload-progress-container');
             const card = document.createElement('div');
             card.className = 'toast-enter w-full pointer-events-auto rounded-xl border shadow-xl p-4';
             card.style.cssText = `background-color: var(--bg-card); border-color: var(--border-main); transition: opacity 0.3s ease, transform 0.3s ease;`;
+
+            const initialStatus = initialPosition != null
+                ? `Position ${initialPosition} in queue...`
+                : 'Initializing...';
 
             card.innerHTML = `
                 <div class="flex items-start space-x-3">
@@ -1165,7 +1244,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
-                        <p class="text-xs mt-0.5 mb-2" style="color: var(--text-dim);" id="job-status-text">Initializing...</p>
+                        <p class="text-xs mt-0.5 mb-2" style="color: var(--text-dim);" id="job-status-text">${initialStatus}</p>
                         <div class="w-full h-1.5 rounded-full overflow-hidden" style="background-color: var(--bg-hover);">
                             <div id="job-progress-bar" class="h-full rounded-full transition-all duration-500" style="width: 5%; background-color: var(--accent);"></div>
                         </div>
@@ -1173,17 +1252,17 @@
                 </div>
             `;
             container.appendChild(card);
-            pollJob(jobData.job_id, card);
+            pollJob(jobData.job_id, card, initialPosition);
         }
 
-        async function pollJob(jobId, card) {
+        async function pollJob(jobId, card, lastKnownPosition = null) {
             // If the card was manually removed by the user, stop polling
             if (!document.body.contains(card)) return;
 
             try {
-                const res = await fetch(`/jobs/${jobId}`);
-                if (!res.ok) throw new Error('Failed to fetch job status');
-                const data = await res.json();
+                const jobRes = await fetch(`/jobs/${jobId}`);
+                if (!jobRes.ok) throw new Error('Failed to fetch job status');
+                const data = await jobRes.json();
 
                 const statusText = card.querySelector('#job-status-text');
                 const iconContainer = card.querySelector('#job-icon-container');
@@ -1194,7 +1273,23 @@
 
                 // Update Text based on exact states from JobStatus enum
                 if (status === 'queued') {
-                    statusText.textContent = 'Queued for extraction...';
+                    // Fetch queue status to show pending count
+                    let queuePending = null;
+                    try {
+                        const queueRes = await fetch('/queue');
+                        if (queueRes.ok) {
+                            const queueData = await queueRes.json();
+                            queuePending = queueData.pending;
+                        }
+                    } catch (e) { /* ignore queue fetch errors */ }
+
+                    if (queuePending != null && queuePending > 0) {
+                        statusText.textContent = `In queue — ${queuePending} job${queuePending !== 1 ? 's' : ''} pending...`;
+                    } else if (lastKnownPosition != null && lastKnownPosition > 0) {
+                        statusText.textContent = `Position ${lastKnownPosition} in queue...`;
+                    } else {
+                        statusText.textContent = 'Queued for extraction...';
+                    }
                     progressBar.style.width = '5%';
                 } else if (status === 'extracting') {
                     const current = progress.current_page || 0;
@@ -1247,11 +1342,11 @@
                 }
 
                 // Poll again after delay
-                setTimeout(() => pollJob(jobId, card), 1000);
+                setTimeout(() => pollJob(jobId, card, lastKnownPosition), 1000);
 
             } catch (err) {
                 console.error(err);
-                setTimeout(() => pollJob(jobId, card), 3000);
+                setTimeout(() => pollJob(jobId, card, lastKnownPosition), 3000);
             }
         }
 
